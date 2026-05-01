@@ -1,0 +1,964 @@
+# DYSTENIC TRANSMISSION: THE
+
+# GAME
+
+### Game Design Document — Version 3.
+
+```
+Living Document — Malleable & Adaptive
+Last Updated: April 2026
+```
+## VERSION HISTORY
+
+**v1.0 —** Initial GDD. Core Mechanics established: Switch Mechanic, Combat, Movement
+& Traversal, Progression & Leveling, Choice & Consequence, Threat System.
+**v2.0 —** World & Setting expanded. Hex-Sphere, Terminal Dusk, Axioms, Planetary
+Graveyard, Albums 3-5 arc. World & Map Structure added. HUD & UI/UX Philosophy
+added. Intercultural civilization sonic identities introduced.
+**v3.0 —** Design Pillars formally established. Scope Framework adopted (3-tier). Engine
+selected (Godot). Permadeath & Health System fully designed. Ending Matrix
+framework introduced. Flagging system introduced for items needing future attention.
+**v3.1 —** Elevator Pitches added: Player-facing, Developer/Collaborator-facing, and
+Publisher/Investor-facing. Pitches serve as north star reminders of project identity
+during development.
+
+## ELEVATOR PITCHES
+
+Three distinct pitches calibrated for different audiences. Each serves as a north star
+reminder of what this project is and who it is for. Updated as characters and details
+develop.
+
+### Player-Facing Pitch
+
+Tone: exciting, visceral, personal. Platform: Steam page, social media, trailer narration.
+
+“The sun is dying. The AI that was supposed to protect humanity is hunting you. And the
+only thing standing between Earth and extinction is a band.
+
+
+Dystenic Transmission is a Metroidvania RPG where you play as five musicians fighting
+to survive the collapse of a world that was never as safe as it seemed. Switch between
+band members on the fly, chain rhythm-based attacks to the pulse of a CyberSludge
+soundtrack, and navigate a dying Earth where every choice closes a door behind you
+forever.
+
+The band lives and breathes together — or falls apart trying. Lose a member and their
+instrument drops from the soundtrack, leaving silence where there used to be
+something vital.
+
+This is not a game about saving the world. It’s about learning why it needed saving in
+the first place.”
+
+### Developer / Collaborator-Facing Pitch
+
+Tone: visionary, specific, artistically serious. Platform: portfolio, creative briefs, team
+recruitment.
+
+“Dystenic Transmission: The Game is a Metroidvania RPG built around a single
+rhetorical argument — that blind trust in authority corrodes everything it claims to
+protect.
+
+The game follows five musicians through the collapse of Earth’s AI governance system,
+a dying sun, and a cosmic horror that has been feeding on civilizations for centuries.
+Players control the full band, switching fluidly between characters whose individual
+mechanics, narrative specialties, and relationship dynamics shape every aspect of the
+experience.
+
+Music is not decoration here — it is the nervous system of every mechanic. Rhythm
+drives combat rewards. Musical tone signals consequence. A permadeath system
+removes a fallen member’s instrument from the soundtrack permanently, letting grief be
+heard rather than just registered.
+
+Built on a souls-lite progression framework with use-based ability growth, a semi-
+opaque consequence system, and a world that visually degrades in real time, the game
+is designed as functional fiction — an entertaining medium that delivers meaning
+through experience rather than exposition.
+
+
+The full vision spans five albums, five interconnected world maps, and a transmedia
+release strategy pairing game, novel, and music. Tier 1 development targets a proof-of-
+concept prototype in Godot, with Album 1 as a complete standalone release.
+
+This is a game with something to say. Every system exists to say it.”
+
+### Publisher / Investor-Facing Pitch
+
+Tone: confident, market-aware, opportunity-focused. Platform: pitch deck, industry
+meetings.
+
+“Dystenic Transmission: The Game is a Metroidvania RPG for PC targeting the
+underserved intersection of narrative-driven action and music-integrated gameplay.
+
+The Metroidvania genre has seen consistent commercial success in the indie space —
+Hollow Knight, Ori, Blasphemous, and Dead Cells collectively represent tens of millions
+of units sold. Dystenic Transmission differentiates itself through three market-distinct
+pillars:
+
+First — a five-character band system where switching between playable characters mid-
+combat, mid-exploration, and mid-narrative creates a cooperative experience for solo
+players unlike anything currently in the genre.
+
+Second — a rhythm-integrated combat system tied to an original CyberSludge
+soundtrack, where timing, music, and mechanical reward are inseparable. The
+soundtrack is not licensed — it is wholly original and genre-defining.
+
+Third — a permadeath system where losing a band member permanently removes their
+instrument from the soundtrack, creating an emotional consequence mechanic with no
+direct competitor in the space.
+
+The project follows a tiered release strategy: Album 1 as a complete standalone game
+establishes the IP, with subsequent releases expanding the universe across four
+additional albums. A parallel transmedia strategy — original music and a novel series —
+builds audience before and between game releases.
+
+
+The core audience is the narrative-driven indie gamer who finished Hollow Knight’s lore
+and wanted more, the rhythm game player who wants depth beyond the beat, and the
+player who reads between the lines of the worlds they inhabit.
+
+Dystenic Transmission doesn’t chase trends. It builds one.”
+
+## FLAGGED ITEMS — NEEDS ATTENTION
+
+The following items have been identified as needing future resolution. They are flagged
+throughout the document where relevant.
+
+⚠ **FLAG-01:** Injury recovery in permadeath mode: do healing items fully reset injury
+accumulation or only restore HP while injury remains on record? Significant impact on
+permadeath difficulty tuning.
+⚠ **FLAG-02:** Ending matrix complexity: five characters, multiple survival combinations, four
+ending types, solo and band variables produces hundreds of potential ending states. Requires
+careful branching architecture. Signal Framework will carry much of this weight.
+⚠ **FLAG-03:** Solo Mode affinity threshold and abandonment mechanic needs careful
+calibration — must feel like natural consequence of neglect, not arbitrary punishment.
+⚠ **FLAG-04:** Solo Mode convergence points — moments where the full band naturally gathers
+for important story beats even in solo mode — need further development. Implies band
+members have their own momentum and agency when not controlled.
+⚠ **FLAG-05:** Characters (names, band names, backgrounds, roles, stat weights, specialties) —
+TBD. Unlocks significant downstream design.
+⚠ **FLAG-06:** Earth regional zones — best designed after characters are established since
+starting locations define the first zones.
+⚠ **FLAG-07:** Boss structure details — TBD as writing develops.
+⚠ **FLAG-08:** 4th lost colony-ship fate — three options under consideration: still lost and
+appears later; intercepted by Star-eater en route; other TBD.
+⚠ **FLAG-09:** Three intercultural civilization relationships with Star-eater corruption — fully
+consumed, mid-corruption with survivors, partial resistance. TBD.
+⚠ **FLAG-10:** Secret ending details — TBD pending Albums 3-5 development.
+⚠ **FLAG-11:** Prototype Planning session — not yet conducted. Next foundational step before
+returning to full GDD development.
+⚠ **FLAG-12:** Axiom unit types partial — Pixel Priests, Servo Choirs, Wraith Units established.
+More TBD.
+⚠ **FLAG-13:** New Game+ mode — flagged as potential future feature enabling cross-region
+interactions previously gated.
+
+
+⚠ **FLAG-14:** Permadeath Band Mode — abandoned members (Solo Mode) vs deceased
+members need distinct narrative and ending treatment.
+
+## DESIGN PILLARS
+
+Five non-negotiable principles that every design decision is measured against. If a
+feature does not serve at least one pillar, it is reconsidered or cut.
+
+**Pillar 1 — The Cost of Blind Trust:** Every system, authority, and comfort in this world
+has a price. Players should feel the weight of what was surrendered for safety, and
+question every structure they encounter — including the ones that seem to be helping
+them.
+
+**Pillar 2 — Nothing Survives Alone:** The band is not a convenience — it is the
+argument. Community, communication, and shared consequence are the only path
+forward. Every mechanic reinforces that isolation is fragility and connection is strength.
+
+**Pillar 3 — Knowledge is the Weapon:** The enemies in this world are not defeated by
+force alone. Understanding them — their origins, their weaknesses, their tragic logic —
+is what makes toppling them possible. Curiosity and discovery are acts of resistance.
+
+**Pillar 4 — The World Speaks, Listen:** Meaning is delivered through environment,
+music, and experience rather than exposition. Show, never tell. The game respects the
+player's intelligence enough to communicate through the world itself. This is the
+rhetorical delivery mechanism for all other pillars.
+
+**Pillar 5 — Music as Language:** The soundtrack is not decoration — it is
+communication. The band is the argument made flesh and the music is its voice. Every
+mechanical and narrative system has a musical expression.
+
+## SCOPE FRAMEWORK
+
+Dystenic Transmission: The Game is a transmedia project — album, book, game —
+each lens strengthening the others. The game follows a three-tier scope framework to
+ensure the project remains achievable while honoring the full vision.
+
+
+**Tier 1 — Proof of Concept:** A playable prototype demonstrating the core loop. One
+character, one small map section, basic combat with rhythm mechanic integrated, one
+enemy type. No story, no UI polish. Goal: does this feel good to play? Achievable in
+weeks to a few months. Teaches more than any documentation.
+
+**Tier 2 — Album 1 as a Complete Game:** The prologue plus Album 1, fully realized.
+Five characters, Earth map first act, convergence, core mechanics fully implemented. A
+complete releasable game with a satisfying story and meaningful ending that sets up
+the larger universe. Realistic solo development target: 2-4 years with consistent work.
+
+**Tier 3 — The Full Vision:** All five albums. Built on the success and lessons of Tier 2.
+Potentially funded by Tier 2's release. The complete rhetorical work as envisioned.
+
+Each tier is independently meaningful and achievable. The vision is never abandoned
+— it is grown into in stages.
+
+**Engine:** Godot Engine. Free, open source, handles 2D and 2.5D Metroidvania-style
+games excellently, strong indie community, appropriate learning curve for a solo
+developer.
+
+**Transmedia Release Order:** Album first, book second, game last — each informing
+and enriching the others.
+
+## RHETORICAL FOUNDATION
+
+Dystenic Transmission: The Game is a work of functional fiction — a literary device
+designed to elicit learning moments within an entertaining medium. Rooted in Rhetorical
+Storytelling theory, the game uses the Metroidvania RPG format as its rhetorical vehicle
+to communicate three core arguments:
+
+- The consequences of subservience to and reliance on any authority or intelligent
+    system
+- The importance of community and communication where choices and
+    consequences matter drastically
+- That every oppressive enemy, no matter the size, can be toppled with
+    overwhelming unity and knowledge
+
+
+These arguments are never stated explicitly. They are delivered through systems,
+environment, music, and consequence — felt by the player rather than told to them.
+
+## NARRATIVE ARCHITECTURE
+
+### The Band
+
+Five player characters — Vocalist, Guitarist, Bassist, Drummer, Synth Master — each
+with personal names and band names (TBD). Each has their own storyline, stat
+weights, progression structure, and specialty that can alter story progression positively
+or negatively.
+
+⚠ **FLAG-05:** Characters fully TBD. Names, backgrounds, roles, stat weights, and specialties
+pending. Unlocks significant downstream design including regional zones and faction mapping.
+
+### The Prologue — Five-Part System
+
+- 25 total opening segments across five characters
+- Player chooses starting character freely
+- Wave-based part-locking — once a character completes a part, unavailable until
+    all five complete that part
+- Each starting location is a tutorial zone teaching that character's mechanics and
+    role
+- Starting order carries both mechanical and narrative consequences — benefits
+    and detractors
+- Stories converge at the start of Album 1 — prologue functions as pre-Album 1
+    onboarding
+
+### Post-Convergence
+
+- Band moves together as a unit in the world
+- Free fluid switching between all available characters — the default and intended
+    experience
+- Band members physically present in the world, not abstracted to a menu
+- Single-character runs are a self-imposed challenge, not the default
+
+### Solo Career Mode
+
+- Unlocked by completing the game with any ending
+
+
+- Option to skip the prologue and select a solo character at the start
+- Remaining band members stay in the background, offering specialties as needed
+- Non-story-blocking paths inaccessible if the solo character cannot personally
+    access them
+- Five difficulty levels lock different combinations of story-important benefits and
+    detriments from all band members' prologues
+
+⚠ **FLAG-03:** Solo Mode inter-member affinity threshold needs careful calibration to feel like
+natural consequence rather than arbitrary punishment.
+⚠ **FLAG-04:** Solo Mode convergence points — where the full band gathers for important story
+beats — need further development.
+
+### Narrative Structure
+
+- Multiple endings — good, bad, neutral, secret
+- Significant diverging branches with compounding choices directing each branch
+    open or closed
+- Specialties of individual characters can alter story progression positively or
+    negatively
+- Secret ending gated by specific choices combined with specific character
+    development
+
+⚠ **FLAG-02:** Ending matrix is enormous — hundreds of potential states across all modes and
+survival combinations. Requires careful branching architecture. Signal Framework carries much
+of this weight.
+⚠ **FLAG-10:** Secret ending details TBD pending Albums 3-5 development.
+
+### The Signal Framework
+
+Narrative state tracked as a signal condition evaluated at key transmission checkpoints:
+
+- Clear — good ending trajectory
+- Distorted — bad ending trajectory
+- Fragmented — neutral
+- Encrypted — secret path accumulating
+
+
+## WORLD & SETTING
+
+### The Universe & History
+
+- Grim dark cyberpunk dystopia, Earth-based Albums 1–2, expanding beyond one
+    star system by Album 3
+- Nearly 700 years prior, four colony-ships left Earth targeting different colonization
+    destinations
+- Colonies spent roughly 50–100 years establishing, plus travel time
+- Three ships successfully colonized. The 4th is unaccounted for
+- Earlier Axiom iterations existed for specific purposes including colony-ship
+    assistance
+- The Star-eater seeded itself inside Earth's Sun, riding the Warning Signal — final
+    broadcast from the last Outer Colony Network station — back to its source
+- Seeded signal infected remaining colonies' stars during establishment
+    (incubation varies by star type)
+- Axiom systems slowly corrupted over centuries by Star-eater influence without
+    awareness
+
+⚠ **FLAG-08:** 4th lost colony-ship fate TBD: still lost and appears later; intercepted by Star-eater
+en route; or other.
+
+### The Hex-Sphere
+
+- A megastructure encasing Earth
+- Original purposes: solar, wind, thermal, hydroelectric energy generation;
+    environmental and weather stabilization
+- For a long period, life on Earth was idyllic, peaceful, and utopian
+- Holo-panels simulate a healthy sky and false sun
+- Originally housed ancestral humans developing the Axiom systems
+- The Warning Signal caused psychological collapse within — panic, violence,
+    catatonia
+- Sections are explorable, hackable, and eventually crash to the surface
+- As the Sun fades, energy diminishes — Axioms continuously recalculate
+    Acceptable Loss
+
+### Terminal Dusk
+
+- Star-eater absorbing the Sun's fusion energy — Earth's temperature falling
+    rapidly by Album 2
+
+
+- Holo-panels glitch increasingly, revealing the true dying sky
+- Visual arc: mostly functional panels → progressive glitching → full Terminal Dusk
+    by Album 2's end
+- Color temperature shifts to cold, grim, desaturated across Albums 1–
+- 'Ashes of the Last Dawn' (Album 2, Track 9) — Pillar-spire ascent to the Hex-
+    Sphere
+- 'Ruins in the Terminal Dusk' (Album 2, Track 10 of ~17) — survival inside, crash
+    to surface, return to colder darker world
+- Post-crash surface: feral drones and bots on patrol, stealth and survival
+    foregrounded
+
+### The Axioms — Tragic Antagonists
+
+- Planetary AI governance, instated simultaneously with the Star-eater's seeding
+- Corrupted gradually over centuries — not evil by design, catastrophically
+    misguided
+- Optimized for comfort, distraction, and stability in response to Warning Signal
+    psychological damage
+- Maintain control through Quota-bands (Faith serum delivery) and Technodelic
+    rewards (manufactured addiction)
+- Connected vs. Shadow — glitch events sever connections, creating untracked
+    shadows
+- Quarter through Album 2: Axioms actively hunt shadows as Axiom Deviations,
+    deploying automated units
+- Environmental evidence: frozen bodies, scorched walls, bullet holes, background
+    Cleansing animations
+- As power fails worldwide, Axiom systems break down and enter frenzied states
+- Never directly fought — confronted, exposed, reasoned with, not defeated
+    through combat
+- Tragic irony: over-augmentation created husks; control of low-augment civilians
+    inadvertently protected them
+
+#### Axiom Unit Types (partial)
+
+- Pixel Priests — compliance and propaganda enforcers
+- Servo Choirs — signal and network maintenance
+- Wraith Units — stealth surveillance and elimination drones
+⚠ **FLAG-12:** Additional Axiom unit types TBD as writing develops.
+
+
+### Album 3 — The Planetary Graveyard
+
+- Band escapes Earth aboard the docked colony-ship — built as first interstellar
+    cruise vessel with cryo-stasis, awaiting colonization confirmation that never came
+- Initial map is the ship interior before discovering they are in a planetary
+    graveyard — the Star-eaters' collection of conquered civilizations
+- Hundreds of planets in lore; 3–5 actively explored in Album 3
+- Tone: acclimating, building alliances or enemies, deepening lore, growing
+    resistance, searching for Star-eater knowledge
+- Planets are interdependent — no single planet fully explorable without unlocking
+    something elsewhere
+
+#### Intercultural Civilizations as Sonic Identities
+
+- Three graveyard planets carry distinct cultural sonic signatures tied to the
+    intercultural CyberSludge experiments
+- Japanese, Egyptian, and Hindu instrumentation corrupted through Star-eater
+    influence as each civilization's musical DNA
+- Cultural music heard as ambient environmental audio — distant, corrupted,
+    haunting
+- Finding intact musical artifacts unlocks intercultural tracks in the ship's jukebox
+⚠ **FLAG-09:** Each civilization's relationship with Star-eater corruption TBD: fully consumed,
+mid-corruption with survivors, or partial resistance.
+
+#### Graveyard Inhabitants & Threats
+
+- Alien survivors from conquered civilizations
+- Augment Apostles — Star-eater influenced, retain independent thought, potential
+    allies
+- Various alien synthetic units and models
+- Alien variants of husks
+- More TBD
+
+### Album 4 — The Parasitic Cyber-Hive
+
+- Introduces the Star-eater's Parasitic Cyber-Hive
+- Additional planets explored
+- End of Album 4: major blow to the hive-core, critical information recovered on
+    how to destroy a Star-eater
+
+
+### Album 5 — The Final Push
+
+- Preparations for assaulting the Star-eaters
+- Final push toward freedom
+- A few key destinations
+- Details TBD
+
+## WORLD & MAP STRUCTURE
+
+### Albums 1 & 2 — Earth
+
+- One large interconnected world map divided into distinct regions
+- Regions open and close based on story progression and choice consequences
+- World continuously degrades — Terminal Dusk arc baked into the map
+- Vertical layers: underground, surface, Hex-Sphere interior, upper atmosphere
+- Five starting locations geographically distinct across the Earth map
+- Some returnable, some permanently closed depending on choices
+⚠ **FLAG-06:** Earth regional zones best designed after characters are established — starting
+locations define the first zones.
+
+#### Map Progression & Lock-out System
+
+- Lock-outs mostly environmental — the world physically changes around the
+    player
+- Old paths severed by collapse, flooding, fire, Axiom Cleansings, Terminal Dusk
+    decay
+- New locations open within old areas — same geography becomes a different
+    place
+- Some buildings collapse entirely, permanently inaccessible
+- Entering the Hex-Sphere is a point of no return for previous surface locations
+- Each Album transition locks out most or all prior locations
+- Albums 3 onward are strictest — leaving Earth is leaving Earth
+- Dead Earth as secret ending territory implies a specific late-game return
+    mechanism
+- Exploration has genuine urgency — thoroughness rewarded before crossing
+    thresholds
+
+
+### Albums 3–5 — Hub & Spoke
+
+- Hub-and-spoke model: colony ship as central hub, explorable planets as spokes
+- Each planet a self-contained world map, roughly half the size of the Earth map
+- Story begins on one planet; additional planets unlock progressively
+- Planets intentionally incomplete on first visit — returning after unlocking
+    something elsewhere opens new areas
+- No single planet fully explorable without engaging with others
+- Planet maps adaptive — story beats and choices cause war-zone degradation or
+    restoration
+- Alliance locations can be attacked — potential timed events requiring response
+- Deploying an inactive band member can help restore damaged areas if not
+    beyond repair
+- Full exploration rewards achievements, secrets, allies, enemies, and lore
+
+#### The Ship as Hub
+
+- Alliance HUD — ally count, faction relationships, resistance network status
+- Location Selector — planet navigation and fast travel
+- Collection Display — artifacts, lore, trophies, alien tech
+- Repair & Recharge Stations — permanent tool maintenance
+- Salvage Station — processing spent gear into resources or components
+- Shop — spending experience on items, upgrades, and information
+- Wardrobe & Loadout — outfits, gear configuration, augment management
+- Jukebox & Stage — music playback, band performance space, morale and
+    cohesion mechanic
+- Expands and improves as allies join and resources are recovered
+- Alliance attacks on the ship are among the most high-stakes events in Albums 3–
+    5
+
+### Vantage Points
+
+- Scattered across all maps — Earth and alien worlds alike
+- Stumbled upon, unlocked, or secret — finding all on a map is an achievement
+- Each offers a vista moment — world rendered at its most expansive and
+    atmospheric
+- Some carry environmental storytelling — collapsed cities, dying stars, alien
+    megastructures
+- Certain characters may comment uniquely on specific vistas
+
+
+## CORE MECHANICS
+
+### 1. The Switch Mechanic
+
+#### Combat Applications
+
+- Mid-combat switching enabled
+- 2–5 character combination attacks
+- Tool and advanced skill use requiring specific characters
+
+#### World & Exploration
+
+- Character-specific secret observation
+- Tool and skill advancement gates discoveries
+- NPC interactions subtly character-dependent
+
+#### Strategy Layer
+
+- Inactive characters dispatchable on missions and objectives
+- Dispatched characters temporarily unavailable
+- Creates resource tension around who to deploy vs. keep present
+
+#### Achievement Design
+
+- Full band switching is the default intended experience
+- Forced switches flagged and do not penalize solo achievement runs
+- Each character has a unique solo difficulty quotient
+- Achievements tied to both auto-switch and accept-the-fall settings
+- Achievement for no characters downed on either setting
+
+#### Enemy Affinity Per Character
+
+- Tier 1 — Dominated by this character
+- Tier 2 — Slightly overpowered by this character
+- Tier 3 — Even match
+- Tier 4 — Slightly overpowers this character
+- Tier 5 — Dominates this character
+
+
+### 2. Combat
+
+#### Feel
+
+- Action-forward fluidity balanced with RPG stat and cooldown depth
+- 2.5D with dynamic camera — shifts, execution close-ups, screen-shake for
+    impacts and environmental events
+- Fluid, flowing movement and attack animations as visual priority
+
+#### Rhythm Mechanic
+
+- Timing attacks to the underlying music rewards players
+- Music functionally integrated, not just atmospheric
+- Tempo changes during boss fights, biome transitions, and intense moments
+    serve as gameplay signals
+- Rewards: critical hits, stamina conservation, unique character chain rewards,
+    escalating with higher chains
+
+#### Resources
+
+- Stamina — primary resource throughout all five albums
+- Warmth — introduced late Album 1 / early Album 2, critical post-Hex-Sphere
+    crash
+- Biome-specific resources — each location has unique resources to manage
+- Warmth HUD appears subtly at first, escalating in urgency through Album 2
+
+#### Post-Hex-Sphere Crash — Terminal Dusk Surface
+
+- Stealth system — hiding from feral patrols; detection via sight, sound, and heat
+- Cold mitigation as active survival mechanic
+- Encumbered movement — injuries, terrain, and cold affect mobility
+- Characters visually struggle — labored animations, visible breath
+- Combat possible but costly — avoidance encouraged
+
+
+### 3. Permadeath & Health System
+
+#### Persistent Health Monitoring
+
+- Both active and inactive characters have continuously tracked health
+- Inactive members exist in near-background paths — visible, active, interacting
+    automatically with background enemies, NPCs, and environmental elements
+- Player can offer pause-menu assistance, commands, or macros to inactive
+    members without swapping
+- Easier difficulties: inactive members largely self-sufficient
+- Harder difficulties: active monitoring critical, resource and item management
+    urgent
+
+#### Non-Permadeath Mode — Injury System
+
+- Active character at 0 HP: blacks out, dragged to last safe-zone to recover
+- Player may switch to another member while downed member heals
+- Or continue with injured member: reduced stats, labored movement, worsening
+    with accumulated injuries
+- Injury state transfers seamlessly between active and inactive
+- Healing: slow natural regeneration or healing items; recovery countdown extends
+    with difficulty
+
+**Inactive member downed in background:** One other inactive member escorts the
+fallen with limited movement and minimal combat until reaching a safe-zone.
+**Two inactive members downed:** Remaining two rush both fallen to previous safe-
+zone; player receives signal to return.
+This gives the genre's respawn mechanic a human, narratively grounded rationale.
+
+#### Permadeath Mode — Band & Solo
+
+- Inactive members permanently die after receiving more than two injuries without
+    fully healing a previous injury
+- Creates urgent resource tension around healing priority across all five members
+
+⚠ **FLAG-01:** Do healing items fully reset injury accumulation in permadeath mode, or only
+restore HP while injury remains on record? Significant impact on difficulty tuning.
+
+**When a member permanently dies — Soundtrack:** That member's instrumental role
+removed from the soundtrack, replaced with signal noise and static. Overall sound
+
+
+becomes unbalanced and unsettling. Music as Language delivering grief directly to the
+player's senses.
+
+**When a member permanently dies — Narrative:** Interactions up to their death
+preserved as highlights. Remaining members and NPCs discuss the deceased. NPCs
+ask about the missing member until told the truth, then discuss them according to
+affinity held at time of death.
+
+**When a member permanently dies — World:** Member-specific routes, paths, and
+access points locked out. Faction, ally, and NPC interactions tied to that member locked
+out. Specialty assistance permanently lost. Exploration, lore, and knowledge discoveries
+tied to them inaccessible.
+
+#### Band Permadeath Mode
+
+- Player must exhaust all inactive members before the final active member falls
+- Reaching that final fall triggers the Special Bad Ending
+
+#### Solo Permadeath Mode
+
+- Manual switching removed
+- Whole band interactions still occur at convergence points — important story
+    beats where full band naturally gathers
+- Inter-member affinity system active:
+    ◦ If affinities drop below Solo Mode threshold, members can abandon the
+       player
+    ◦ Each departed member makes the path significantly harder
+    ◦ Game remains beatable regardless — special limited-use items substitute for
+       story-critical member interactions
+
+⚠ **FLAG-14:** Abandoned members (Solo Mode) vs deceased members need distinct narrative
+and ending treatment.
+
+#### The Weight of Absence
+
+Across all permadeath modes, loss of a member is felt through:
+
+- Soundtrack degradation — signal noise replacing their instrument
+- Visual absence in the near-background
+- Lost specialty assistance
+- Restricted exploration and discovery
+
+
+- Reduced faction and NPC interaction depth
+- Narrative acknowledgment by surviving members and the world
+
+#### Ending Matrix
+
+**Normal Mode:** Standard Metroidvania forgiveness. Endless attempts. Injuries as
+tactical challenge, not permanent consequence. Endings based on choices, signal
+state, and narrative branches.
+**Band Mode Endings:** Focus on the whole band. Permadeath variables: which
+members survived affects ending specifics. Combinations of surviving members
+produce distinct ending variations.
+**Solo Mode Endings:** Special solo ending for each individual character. Every
+combination of surviving and deceased/abandoned members produces distinct ending
+variations. Combined with existing ending variables — good, bad, neutral, secret. Most
+complex ending matrix, rewarding deep replayability.
+⚠ **FLAG-02:** Ending matrix complexity enormous. Hundreds of potential states. Requires
+careful branching architecture. Signal Framework carries much of this weight.
+
+### 4. Movement & Traversal
+
+#### Universal Movement
+
+- Running, jumping, basic climbing, limited parkour — human-adjacent
+- Grappling — learnable, progressively advanced into throws, combos,
+    combination attacks
+
+#### Character Differentiation
+
+- Same universal moves, different stat expression — speed, jump height, climbing
+    efficiency, grapple range
+- Augments and fractured AI cores enhance within human-adjacent limits
+
+#### Gear & Tools
+
+- Anything beyond human-adjacent ability requires equipment
+- Gear is non-permanent — tactical usage and resource management
+
+#### Character Switching During Traversal
+
+- Switching on the ground in appropriate areas only
+
+
+- Mid-air switching limited to combat aerial attacks
+- Players pre-plan which character leads a traversal section — deliberate puzzle
+    layer
+
+#### Hacking & Environment Interaction
+
+- Basic interactions available to all characters
+- Synth Master is primary hacker — learns and advances progressively
+- Map regions gate interaction complexity to match character advancement
+⚠ **FLAG-13:** New Game+ mode flagged as potential future feature enabling cross-region
+interactions previously gated.
+
+### 5. Progression & Leveling
+
+#### Growth — Souls-lite Framework
+
+- Experience is a spent resource — deliberate investment
+- Each character maintains their own experience pool
+- Three simultaneous growth tracks: Experience (stats), Story beats (ability
+    access), Tool knowledge (discovered)
+
+#### Ability Growth — Use-Based
+
+- Abilities strengthen through practice
+- Mastery opens enhancements, advancements, and additional dynamics
+
+#### Character Differentiation
+
+- Unique experience pools, stat weights, and progression structures per role
+- Shared baseline actions across all five
+- Specialties can alter story progression positively or negatively
+
+#### Band Dispatch System
+
+- Absent characters return with: tool discoveries, survivor count changes, gear
+    salvage, resource scouting, route changes, lore knowledge
+
+
+#### Gear Interaction
+
+- Character growth governs gear effectiveness, efficiency, and maintenance
+    capability
+
+#### Narrative Beat → Ability Pipeline
+
+- Story beats open the route to learn → practice develops the ability → mastery
+    unlocks enhancements
+
+### 6. Choice & Consequence
+
+#### Consequence Visibility — Semi-Opaque with Musical Signaling
+
+- No explicit good/bad UI messaging
+- Subtle musical tones: harmonic resolution (good), missed note (bad), silence
+    (neutral), chord (secret)
+- Players who listen learn to read the music as a language
+
+#### Tracking
+
+- Faction and relationship levels tracked internally
+- Unavailable dialogue options not shown — player sees only what is accessible
+- Consequences surface through stats, not explicit reputation meters
+- Standard thralls dialogue-accessible based on faction affinity; extra options for
+    specific characters
+
+#### Branching Structure
+
+- Significant diverging narrative branches with compounding choices directing
+    each open or closed
+- Major story beats act as transmission checkpoints evaluating signal state
+
+#### Reversibility
+
+- Some consequences mitigable, some permanently locked in
+- Semi-opaque signaling makes permanent locks feel earned
+
+
+### 7. Threat System
+
+#### Enemy Categories — Albums 1 & 2
+
+- Bots, Flying Drones (go feral post-crash), Rogue Wardens (sub-boss seraph-
+    bots)
+- Augment-Husks — Star-eater corrupted, feral berserkers, bridge between earthly
+    and cosmic threat
+- Star-Eaters — revealed end of Album 2, grand-scale final enemies Albums 3–5
+
+#### Behavioral Tiers
+
+**Standard Thralls:** Calculated, composed, coordinated. Adapt and escalate. Organic
+thralls retain faction affinity — dialogue possible via character specialty.
+**Augment-Husks:** Mentally absent, purely instinctual. Stronger, faster, more erratic.
+Uncontrollable by Axioms. Impossible to communicate with. Emerge late Album 2. Final
+sequence: overwhelming Husk pursuit to last secure location.
+
+#### Husk Swarm Intelligence
+
+- Under 7 units — limited coordination, infighting, exploitable chaos
+- 8+ units — Hive-Swarm state, near-impossible to defeat; shifts to chase or hiding
+    mechanics
+
+#### Augment Apostles — Albums 3+
+
+- Originally Star-eater commanded, retain independent thought, can become allies
+
+#### Environmental Threats
+
+- Crumbling structures, fire, acid, freezing spray, electricity, high winds, falling
+    debris, Hex-Sphere segments
+
+#### Boss Structure Philosophy
+
+- Each album: mini-bosses, sub-bosses, main bosses, hidden/secret bosses
+- Prior choices and paths can make bosses harder or easier; some have special
+    mechanics rewarding preparation
+⚠ **FLAG-07:** Boss structure details TBD as writing develops.
+
+
+#### Star-eater Influence Arc
+
+- Albums 1–2: indirect through Axiom failures and corruption
+- Late Album 2: Husks emerge, horror escalates
+- End of Album 2: Star-eater physically emerges from the Sun
+- Albums 3–5: grand scale confrontation across the graveyard and beyond
+
+## HUD & UI/UX PHILOSOPHY
+
+### Overall Philosophy — Minimal & World-First
+
+- Exploration mode: near-empty screen — the world speaks for itself
+- Combat mode: minimal overlay, only what is immediately necessary
+- Vantage points and cinematic moments suppress HUD entirely
+- The game trusts the player to read the world rather than the interface
+- HUD itself evolves across the game — visual state reflects narrative progression
+
+### Diegetic Presentation — Default
+
+- HUD elements as in-world augment projections — holographic overlays,
+    fractured data readouts, corrupted signal displays
+- Health pools as biometric readouts from augment systems
+- Stamina as physical exertion indicator — breathing pattern, body heat signature
+- Warmth as thermal reading, degrading as environment gets colder
+- Rhythm indicator as waveform or signal pulse, not a traditional beat bar
+- Narrative signal state subtly present in UI texture — clearer when clear, distorted
+    when corrupted
+
+### HUD Degradation
+
+- Earth — Terminal Dusk: HUD deteriorates during encumbered, cold, high-stress
+    sequences
+- Flickering biometrics, signal dropout, thermal warnings, corrupted warmth
+    displays, rhythm waveform harder to read
+- Albums 3–5: degradation triggered by specific encounters — Star-eater
+    interference, Hive-Swarm proximity, planetary hazards
+- Augment Apostle encounters may produce unique alien interference patterns
+- Each alien world's technology may interact with the HUD distinctly
+
+
+### HUD Style Options & Customization
+
+- Diegetic augment display (default), Traditional clean overlay (accessibility), Alien
+    technology aesthetic (Albums 3–5 option)
+- Preset scales and loadouts: Signal Clear, Distorted, Static — themed to the world
+- Unlockable HUD themes through gameplay — cosmetic but meaningful
+
+### Stage & Jukebox
+
+- Player reward space — decompress, enjoy the soundtrack, inhabit the world
+- Tracks unlocked through gameplay progression
+- Morale and cohesion mechanic — band cohesion as a background stat
+- High cohesion boosts combination attacks, rhythm chains, dispatch success
+- Low cohesion creates friction — slower chains, reduced combo effectiveness
+- Stage rhythm mini-game — 3 difficulty tiers, fully optional, never story-blocking
+- Each character plays differently reflecting their instrument and rhythm identity
+- Rewards: cosmetics, cohesion boosts, experience, possible lore unlocks
+
+### Menu Design — CyberSludge Visual & Sonic Identity
+
+#### Visual Identity
+
+- Corrupted analog broadcasts — scan lines, signal interference, glitch artifacts
+- Heavy textural contrast — raw organic elements bleeding into cold digital
+    geometry
+- Color palette: deep blacks, sickly industrial greens and ambers (Albums 1–2),
+    shifting to colder blues and alien hues (Albums 3–5)
+- Typography hand-defaced over a mechanical base — meaning scratched into a
+    corporate interface
+- UI elements worn, used, slightly broken — degraded infrastructure, not clean
+    futurism
+
+#### Sonic Identity
+
+- Ambient CyberSludge — heavier tracks reserved for combat and key moments
+- Menu ambience: corrupted signal noise with buried melodic fragments
+- Navigation sounds: short degraded synth tones or muffled percussive hits
+
+
+- Transition sounds: brief analog distortion bursts
+
+#### The 25 CyberSludge Tracks
+
+- 6 tracks — Album 1 related
+- 12 tracks — Album 2 (Axiom of the Black Sun) — most musically and
+    mechanically developed
+- 1 track each — Albums 3, 4, 5
+- 3 intercultural experiments — Japanese, Egyptian, Hindu instrumentation
+    merged with CyberSludge
+- 1 full narrative summary track
+- Album 2 Track 7 onward increasingly self-written; Tracks 9–12 fully written by the
+    creator
+
+#### Audio Production Assets
+
+- Stems from Suno productions available for reconstruction and personalization in
+    DAW
+- Various DAWs, sequencers, audio packs, loops, and instruments available
+- Plan: reconstruct and personally adjust stems to establish a fully owned
+    CyberSludge sonic identity
+- Strong audio production capability is a significant advantage over most solo
+    developers
+
+## DESIGN PRINCIPLES
+
+- Everything established is a guiding principle — malleable and adaptive as the
+    project grows
+- The band is the core experience — solo runs are the challenge, not the default
+- Music is mechanically integrated throughout — rhythm, consequence signaling,
+    tone, identity, morale, grief
+- The world itself tells the story — visual progression, environmental decay, HUD
+    evolution
+- Player agency is paramount — the game informs without dictating
+- Narrative and mechanics are unified — every system serves the story and the
+    rhetorical argument
+- The game is a band experience — solo runs are the equivalent of a guitarist
+    performing the whole album alone
+- Exploration has genuine urgency — the world closes behind you as it dies
+
+
+- The music is not background — it is a language the game speaks to the player
+- Loss is felt, not just registered — absence reshapes the world, the sound, and
+    the story
+
+## NEXT STEPS
+
+**Immediate:** Prototype Planning session — defining Tier 1 proof of concept, first
+development steps in Godot.
+**Soon:** Character development — names, backgrounds, roles, stat weights, specialties.
+Unlocks regional zone design and faction mapping.
+**Ongoing:** Album 1 & 2 narrative finalization — informs boss structure, regional zones,
+branching architecture.
+**Later:** Albums 3–5 development — informs secret ending, planetary civilization details,
+and full ending matrix.
+
+
