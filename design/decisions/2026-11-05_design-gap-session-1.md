@@ -68,6 +68,24 @@ Inputs: `reports/Dystenic Transmission feature deconstruction.md` and `reports/D
 - Ruling: **keep them distinct.** A combat Miss stays a discordant scratch. The choice tones (harmonic, missed note, silence, chord) are their own family, and combat never uses them.
 - Touches: Audio & SFX; GDD Choice & Consequence.
 
+**D-09 · Beat-State: the opening attack**
+- Ruling: **the opening attack is an ungraded anchor.** It lands normally, pays full stamina and sets beat zero. Grading starts with the second input.
+- Considered: grading it against the track's beat before the drop; always counting it as Perfect.
+
+**D-10 · Beat-State: tempo**
+- Ruling: **passages play at the encounter track's tempo**, with the phase reset at the press.
+- Considered: a tempo band per member; a tempo that ramps with the chain.
+
+**D-11 · Beat-State: switching mid-chain**
+- Ruling: **the passage hands off at the same phase.** It passes to the incoming member's instrument without dropping a beat, and the chain continues. This is a musical handoff, not a combination attack, so it is outside the D-04 lock.
+- Considered: Beat-State ends on a switch; switching is blocked during Beat-State.
+- Touches: the Swap State (S1); O-53, what enemies do during a swap, still open and decided from play.
+
+**D-12 · Tier 1 passage production**
+- Ruling: **placeholder patterns.** Simple percussive or tonal patterns per range tier for Vox and Ciphera, enough to test whether Beat-State feels good. Real compositions arrive at Tier 1.5.
+- Considered: one real composed track; the full set.
+- Touches: Plan Phase 5; Audio & SFX and the Music thread (Tier 1.5 scheduling).
+
 ---
 
 ## Flags raised in session (for the owners named)
@@ -78,7 +96,8 @@ Inputs: `reports/Dystenic Transmission feature deconstruction.md` and `reports/D
 
 ## Proposed (awaiting the author)
 
-- Beat-State details: how the opening attack is graded; passage tempo; switching during Beat-State; producing passages for Tier 1.
+- **Default proposal for the growth-credit log schema.** Each judged input records its grade, the signed offset in ms, the offset applied, the context (combat or node), the character, and the Beat-State chain index. Recording the signed offset costs nothing and later feeds calibration suggestions and tuning.
+- O-52 during Beat-State is decided from play. Build toggles for enemies on the passage's grid, on the track's grid, and on their own timers.
 - Pair-bond: what writes it, its thresholds, and whether it stays hidden or shows through tells (B1–B3 in the round 2 report).
 - The growth-credit log schema (P1).
 
