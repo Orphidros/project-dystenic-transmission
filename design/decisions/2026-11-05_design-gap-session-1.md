@@ -86,6 +86,28 @@ Inputs: `reports/Dystenic Transmission feature deconstruction.md` and `reports/D
 - Considered: one real composed track; the full set.
 - Touches: Plan Phase 5; Audio & SFX and the Music thread (Tier 1.5 scheduling).
 
+**D-13 · What writes the pair-bond**
+- Ruling: **shared moments only.** Three things write it:
+  - answering a node Ciphera revealed, where Perfect or Good raises it;
+  - Beat-State handoffs between Vox and Ciphera at Perfect or Good;
+  - the micro-choice.
+- Solo combat hits don't count, so the bond reflects togetherness rather than general skill.
+- Considered: every graded hit; the micro-choice only.
+
+**D-14 · Whether the pair-bond can fall**
+- Ruling: **only through choices.** Performance only raises the bond; Poor and Miss are neutral. Only the micro-choice's missed-note outcome lowers it, so weak rhythm skill never damages the relationship.
+- Considered: misses in shared moments lower it too; it never falls in Tier 1.
+
+**D-15 · How the player perceives the pair-bond**
+- Ruling: **one tell, through the rig light.** Ciphera's beat light (D-02) steadies and warms toward Vox as the bond rises. The value itself stays hidden.
+- Considered: logged only; a line or tone at thresholds.
+- Touches: the light doctrine (hand-made light, small); Audio & SFX if the light pairs with sound later.
+
+**D-16 · Calibration in Tier 1**
+- Ruling: **a tap test plus a slider.** One rerunnable tap test that averages taps and rejects noisy runs, plus a manual offset slider in the options. The growth log's signed offsets allow suggestions later.
+- Considered: adding capped auto-calibration; a slider only.
+- Touches: Plan Phase 5 (scene S6); Phase 7 (options).
+
 ---
 
 ## Flags raised in session (for the owners named)
@@ -98,8 +120,7 @@ Inputs: `reports/Dystenic Transmission feature deconstruction.md` and `reports/D
 
 - **Default proposal for the growth-credit log schema.** Each judged input records its grade, the signed offset in ms, the offset applied, the context (combat or node), the character, and the Beat-State chain index. Recording the signed offset costs nothing and later feeds calibration suggestions and tuning.
 - O-52 during Beat-State is decided from play. Build toggles for enemies on the passage's grid, on the track's grid, and on their own timers.
-- Pair-bond: what writes it, its thresholds, and whether it stays hidden or shows through tells (B1–B3 in the round 2 report).
-- The growth-credit log schema (P1).
+- Pair-bond thresholds, meaning the bands at which the rig-light tell changes. Set them from playtest data in the log; no primary source exists.
 
 ## Parked
 
