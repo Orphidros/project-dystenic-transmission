@@ -46,8 +46,18 @@ like a natural next step:
 - **Explicitly out of scope for Tier 1** — do not implement, even partially,
   without confirming first:
   - Permadeath
-  - Combo systems
+  - Combination attacks (two-character and Full Band). Single-character
+    graded chains and phrases are in scope, including Beat-State and the
+    passage handoff on a switch (author, 2026-11-05).
   - Aerial character-switching
+- **Approved Tier 1 additions (author, 2026-11-05):**
+  - a hidden Vox–Ciphera pair-bond integer;
+  - Ciphera's rig as a beat light (no attacks, no ally AI);
+  - a growth-credit log (records only; nothing is spent in Tier 1).
+
+  Rulings and their details are in
+  `design/decisions/2026-11-05_design-gap-session-1.md`. The GDD and
+  Supplement 1 remain the canon once Design folds them in.
 - If a request would break this scope lock, say so and confirm with the user
   before building it.
 

@@ -116,7 +116,13 @@ Inputs: `reports/Dystenic Transmission feature deconstruction.md` and `reports/D
 - **Implementation detail for the pitch-drop.** A bus pitch-shift effect keeps the track's timeline intact; changing the player's `pitch_scale` (a tape-stop effect) shifts it. Either works, because nothing is graded against the track during Beat-State. Owners: Audio & SFX and Systems & Code.
 - **Godot timing** (round 2 report). There is no scheduled playback in 4.7.1, so a passage becomes audible about one mix chunk plus output latency after the press. The passage clock should be read from the passage stream itself, so grading matches what the player hears. Owner: Systems & Code.
 
+## Built
+
+The first runnable prototype, `scenes/proto/beat_state_proto.tscn`, implements D-02, D-03, D-05 to D-07 and D-09 to D-16. It uses placeholder shapes, code-generated sounds and placeholder numbers. Stamina is not built yet. Headless checks on Godot 4.7.1 (`tests/run_tests.gd`) pass 36 of 36, including an end-to-end smoke test: reveal, switch, answer the cadence, open the gate. The clock probe, `scenes/proto/clock_probe.tscn` (Phase 5 scene S1), needs a run on the target PC.
+
 ## Proposed (awaiting the author)
+
+- **How time-critical nodes are read (from D-06).** The prototype assumes the first-fault grace doesn't apply at time-critical nodes, because combat has no grace. To be confirmed. It's one constant in `scripts/rhythm/node_rules.gd`.
 
 - **Default proposal for the growth-credit log schema.** Each judged input records its grade, the signed offset in ms, the offset applied, the context (combat or node), the character, and the Beat-State chain index. Recording the signed offset costs nothing and later feeds calibration suggestions and tuning.
 - O-52 during Beat-State is decided from play. Build toggles for enemies on the passage's grid, on the track's grid, and on their own timers.
