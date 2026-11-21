@@ -3,8 +3,10 @@ extends Node3D
 ## It implements the session 1 rulings in design/decisions/2026-11-05_design-gap-session-1.md.
 ## Everything is a placeholder: shapes, sounds and numbers. Run it to feel the timing.
 ##
-## Controls: A/D or arrows to move, Space to jump, J close attack, K mid attack,
-## E interact, Tab switch (ground only), [ and ] calibration, F3 debug values.
+## Keys: A/D or arrows to move, Space to jump, J close attack, K mid attack,
+## E interact, Tab switch, [ and ] calibration, F3 debug values.
+## Gamepad (provisional, O-01): left stick or D-pad to move, A jump, X close, Y mid,
+## B interact, RB switch, D-pad up/down calibration, View debug values.
 
 const ACTIONS: Dictionary = {
 	"dt_left": [KEY_A, KEY_LEFT],
@@ -18,10 +20,28 @@ const ACTIONS: Dictionary = {
 	"dt_calib_up": [KEY_BRACKETRIGHT],
 	"dt_debug": [KEY_F3],
 }
-## CoD-11, the Beat-State passage handoff on a switch, is Tier 1.5. Its code stays, but only
-## runs when this is on. Off (Tier 1): a switch request while Beat-State runs is refused
-## silently, and the same request is accepted once Beat-State ends on a Miss or an idle gap
-## (author, 2026-11-20).
+## Provisional gamepad bindings for the author's test on his PC (Systems & Code, 2026-11-21).
+## The real control layout belongs to the input map (O-01) and isn't decided. Xbox names.
+const PAD_BUTTONS: Dictionary = {
+	"dt_left": [JOY_BUTTON_DPAD_LEFT],
+	"dt_right": [JOY_BUTTON_DPAD_RIGHT],
+	"dt_jump": [JOY_BUTTON_A],
+	"dt_attack_close": [JOY_BUTTON_X],
+	"dt_attack_mid": [JOY_BUTTON_Y],
+	"dt_interact": [JOY_BUTTON_B],
+	"dt_switch": [JOY_BUTTON_RIGHT_SHOULDER],
+	"dt_calib_up": [JOY_BUTTON_DPAD_UP],
+	"dt_calib_down": [JOY_BUTTON_DPAD_DOWN],
+	"dt_debug": [JOY_BUTTON_BACK],
+}
+const PAD_AXES: Dictionary = {  # action -> [axis, direction]
+	"dt_left": [JOY_AXIS_LEFT_X, -1.0],
+	"dt_right": [JOY_AXIS_LEFT_X, 1.0],
+}
+const STICK_DEADZONE := 0.3
+## CoD-11, the Beat-State passage handoff on a switch, is Tier 1.5 (OQ-A10). Its code stays,
+## but only runs when this is on. Off (Tier 1; OQ-066, 2026-11-20): a switch request while
+## Beat-State runs is refused silently, and the same request is accepted once Beat-State ends.
 @export var beat_state_handoff_enabled := false
 
 const COMBAT_MISS_STRESS := 6.0  # O-07: stress rises on a Miss.
@@ -51,15 +71,33 @@ var _event := "Approach the far wall. Only Ciphera can see what's there."
 
 
 ## The Phase 1 input map normally lives in project.godot; the prototype registers its own.
+## One action listens to keys and gamepad alike, so the game only asks "was dt_jump pressed?".
+## Provisional bindings (O-01): keys from ACTIONS, buttons from PAD_BUTTONS, stick from PAD_AXES.
 static func ensure_actions() -> void:
 	for a: String in ACTIONS:
-		if InputMap.has_action(a):
-			continue
-		InputMap.add_action(a)
+		if not InputMap.has_action(a):
+			InputMap.add_action(a)
 		for k: int in ACTIONS[a]:
-			var ev := InputEventKey.new()
-			ev.physical_keycode = k
-			InputMap.action_add_event(a, ev)
+			var key := InputEventKey.new()
+			key.physical_keycode = k
+			_add_event(a, key)
+		for b: int in PAD_BUTTONS.get(a, []):
+			var button := InputEventJoypadButton.new()
+			button.device = -1  # any connected controller
+			button.button_index = b
+			_add_event(a, button)
+		if PAD_AXES.has(a):
+			var stick := InputEventJoypadMotion.new()
+			stick.device = -1
+			stick.axis = PAD_AXES[a][0]
+			stick.axis_value = PAD_AXES[a][1]
+			_add_event(a, stick)
+			InputMap.action_set_deadzone(a, STICK_DEADZONE)
+
+
+static func _add_event(action: String, ev: InputEvent) -> void:
+	if not InputMap.action_has_event(action, ev):
+		InputMap.action_add_event(action, ev)
 
 
 func _ready() -> void:
@@ -90,6 +128,7 @@ func _input(event: InputEvent) -> void:
 	if event.is_echo():
 		return
 	# Stamp first: InputEvents carry no timestamp in 4.7.1 (round 2), so this is frame-start time.
+	# Keys and gamepad buttons both arrive here, so both are timed the same way.
 	var t := Time.get_ticks_usec()
 	if event.is_action_pressed("dt_attack_close"):
 		_attack(t, "close")
@@ -115,6 +154,8 @@ func _process(delta: float) -> void:
 
 # --- Actions ---------------------------------------------------------------
 
+## The player can strike whether or not Beat-State runs, and the combo keeps growing with no
+## cap (author, 2026-11-20). The first strike starts Beat-State; later ones are graded (CoD-07).
 func _attack(t: int, tier: String) -> void:
 	beat_state.calibration_ms = calibration_ms
 	beat_state.on_attack(t, active.display_name, tier)
@@ -130,11 +171,12 @@ func _interact(t: int) -> void:
 
 
 func _switch() -> void:
+	# Supplement 1, System 4: if any switch check fails, the switch is denied silently, and the
+	# player learns by feel when switching is allowed (Systems & Code build call, 2026-11-21).
 	if not active.is_on_floor():
-		_set_event("Switching is ground-only")
-		return
+		return  # Ground only.
 	if beat_state.active and not beat_state_handoff_enabled:
-		return  # Refused silently until Beat-State ends (author, 2026-11-20).
+		return  # Refused until Beat-State ends (OQ-066, 2026-11-20).
 	var next := ciphera if active == vox else vox
 	_set_active(next)
 	if beat_state.active:  # Reached only with the CoD-11 handoff enabled.
@@ -272,7 +314,7 @@ func _build_hud() -> void:
 
 func _update_hud() -> void:
 	var lines: PackedStringArray = []
-	lines.append("Active: %s    (Tab: switch, ground only)" % active.display_name)
+	lines.append("Active: %s    (Tab or RB: switch)" % active.display_name)
 	if beat_state.active:
 		var perks := ""
 		if beat_state.chain >= 3:
@@ -281,7 +323,7 @@ func _update_hud() -> void:
 			perks += "  [damage boost]"
 		lines.append("Beat-State: ON (%s passage)   chain %d%s" % [beat_state.tier, beat_state.chain, perks])
 	else:
-		lines.append("Beat-State: off   (J or K to attack; the first attack starts the passage)")
+		lines.append("Beat-State: off   (J/K or X/Y to attack; the first attack starts the passage)")
 	if beat_state.last_grade >= 0:
 		lines.append("Last hit: %s %+.0f ms" % [RhythmWindows.grade_name(beat_state.last_grade), beat_state.last_offset_ms])
 	var prompt := ""
@@ -289,9 +331,10 @@ func _update_hud() -> void:
 		prompt = node.prompt_for(active.display_name)
 	if prompt != "":
 		lines.append(">> " + prompt)
-	lines.append("Calibration: %+.0f ms  ([ / ])" % calibration_ms)
+	lines.append("Calibration: %+.0f ms  ([ / ] or D-pad down / up)" % calibration_ms)
 	lines.append(_event)
-	lines.append("A/D move   Space jump   J close   K mid   E interact   F3 debug")
+	lines.append("Keys: A/D move   Space jump   J close   K mid   E interact   Tab switch   [ ] calibrate   F3 debug")
+	lines.append("Pad:  L-stick or D-pad move   A jump   X close   Y mid   B interact   RB switch   D-pad up/down calibrate   View debug")
 	if show_debug:
 		lines.append("--- debug (hidden values) ---")
 		lines.append("Stress  Vox %.1f   Ciphera %.1f" % [vox.stress, ciphera.stress])

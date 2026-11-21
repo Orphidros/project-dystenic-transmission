@@ -18,11 +18,17 @@ func _run() -> void:
 	_test_node_rules()
 	_test_pair_bond()
 	_test_beat_state()
+	_test_miss_rule()
+	_test_idle_gap()
+	_test_miss_resets_chain()
 	_test_growth_credit()
+	_test_growth_log_sessions()
 	await process_frame
 	await _smoke_prototype()
 	await _test_switch_during_beat_state()
 	await _test_handoff_flag_on()
+	await _test_airborne_switch_silent()
+	await _test_gamepad_bindings()
 	print("\n%d passed, %d failed" % [_passes, _fails])
 	quit(1 if _fails > 0 else 0)
 
@@ -106,8 +112,10 @@ func _test_beat_state() -> void:
 	bs.on_attack(anchor + 4 * beat, "Ciphera", "close")
 	_check(bond.value == 1 and bs.character == "Ciphera", "a Perfect after a handoff writes the bond")
 	bs.on_attack(anchor + 5 * beat + beat / 2, "Ciphera", "close")
-	_check(bs.last_grade == RhythmWindows.Grade.MISS and not bs.active, "a half-beat-off press is a Miss and ends Beat-State")
-	_check(log.entries.size() == 5, "five judged inputs logged")
+	_check(bs.last_grade == RhythmWindows.Grade.MISS and bs.active, "a half-beat-off press is a Miss, and one Miss no longer ends Beat-State")
+	bs.on_attack(anchor + 6 * beat + beat / 2, "Ciphera", "close")
+	_check(bs.last_grade == RhythmWindows.Grade.MISS and not bs.active, "a second Miss in a row ends it")
+	_check(log.entries.size() == 6, "six judged inputs logged, both Misses included")
 	_check(int(log.credits.get("Vox", 0)) == 3 and int(log.credits.get("Ciphera", 0)) == 1, "growth credits per character")
 	for n: Node in [bs, bond, log, music]:
 		n.queue_free()
@@ -208,9 +216,12 @@ func _test_switch_during_beat_state() -> void:
 
 	var anchor: int = proto.beat_state._anchor_usec
 	proto._attack(anchor + beat / 2, "close")  # half a beat off the passage: a Miss
-	_check(not proto.beat_state.active, "a Miss ends Beat-State")
 	proto._switch()
-	_check(proto.active == proto.ciphera, "the same switch is accepted after a Miss")
+	_check(proto.active == proto.vox and proto.beat_state.active, "still refused after one Miss, since Beat-State runs on")
+	proto._attack(anchor + beat + beat / 2, "close")  # a second Miss in a row
+	_check(not proto.beat_state.active, "two Misses in a row end Beat-State")
+	proto._switch()
+	_check(proto.active == proto.ciphera, "the same switch is accepted after Beat-State ends on Misses")
 
 	for i in 10:
 		await physics_frame  # Ciphera takes over the body physics and lands
@@ -243,3 +254,171 @@ func _test_handoff_flag_on() -> void:
 	_check(proto.pair_bond.value == 1, "a Perfect after the handoff writes the pair-bond (CoD-13)")
 	proto.queue_free()
 	await process_frame
+
+
+## A Beat-State with its own music, log and bond, outside any scene, for timing tests.
+func _make_beat_state() -> BeatState:
+	var music := MusicDirector.new()
+	root.add_child(music)
+	var log := GrowthLog.new()
+	root.add_child(log)
+	var bond := PairBond.new()
+	root.add_child(bond)
+	var bs := BeatState.new()
+	root.add_child(bs)
+	bs.setup(music, log, bond, ["Vox", "Ciphera"])
+	return bs
+
+
+func _free_beat_state(bs: BeatState) -> void:
+	for n: Node in [bs, bs.music, bs.growth_log, bs.pair_bond]:
+		n.queue_free()
+
+
+func _test_miss_rule() -> void:
+	print("Beat-State miss rule (CoD-07, amended 2026-11-21)")
+	var bs := _make_beat_state()
+	var beat := int(bs.music.beat_seconds() * 1_000_000.0)
+	var reasons: Array[String] = []
+	bs.exited.connect(func(r: String) -> void: reasons.append(r))
+
+	# The author's first example: Start, Good, Miss, Poor, Miss, Good, Miss.
+	bs.on_attack(Time.get_ticks_usec(), "Vox", "close")
+	var a: int = bs._anchor_usec
+	var seq: Array = [
+		[a + beat + 70_000, RhythmWindows.Grade.GOOD],
+		[a + beat + beat / 2, RhythmWindows.Grade.MISS],
+		[a + 2 * beat + 120_000, RhythmWindows.Grade.POOR],
+		[a + 2 * beat + beat / 2, RhythmWindows.Grade.MISS],
+		[a + 3 * beat - 70_000, RhythmWindows.Grade.GOOD],
+		[a + 3 * beat + beat / 2, RhythmWindows.Grade.MISS],
+	]
+	var grades_ok := true
+	var ran_until_last := true
+	for i in seq.size():
+		bs.on_attack(seq[i][0], "Vox", "close")
+		grades_ok = grades_ok and bs.last_grade == seq[i][1]
+		if i < seq.size() - 1:
+			ran_until_last = ran_until_last and bs.active
+	_check(grades_ok, "the first example grades Good, Miss, Poor, Miss, Good, Miss")
+	_check(ran_until_last, "Beat-State runs through the first two Misses")
+	_check(not bs.active and reasons == ["third_miss"], "the third Miss in total ends it (\"third_miss\")")
+
+	# The author's second example: Start, Good, Miss, Miss.
+	bs.on_attack(Time.get_ticks_usec(), "Vox", "close")
+	a = bs._anchor_usec
+	bs.on_attack(a + beat + 70_000, "Vox", "close")
+	bs.on_attack(a + beat + beat / 2, "Vox", "close")
+	var after_one_miss := bs.active
+	bs.on_attack(a + 2 * beat + beat / 2, "Vox", "close")
+	_check(after_one_miss and not bs.active and reasons.back() == "two_in_a_row", "two Misses in a row end it (\"two_in_a_row\")")
+	_check(bs.misses_total == 2, "the Miss total counts only within this Beat-State")
+	_free_beat_state(bs)
+
+
+func _test_idle_gap() -> void:
+	print("Beat-State idle gap (CoD-07; OQ-A09)")
+	var bs := _make_beat_state()
+	var beat := int(bs.music.beat_seconds() * 1_000_000.0)
+	var reasons: Array[String] = []
+	bs.exited.connect(func(r: String) -> void: reasons.append(r))
+	_check(is_equal_approx(bs.idle_gap_beats, 3.0), "the idle gap defaults to 3 beats")
+	bs.on_attack(Time.get_ticks_usec(), "Vox", "close")
+	bs._last_input_usec = Time.get_ticks_usec() - int(2.9 * beat)
+	bs._process(0.0)
+	_check(bs.active, "2.9 beats without input keeps Beat-State running")
+	bs._last_input_usec = Time.get_ticks_usec() - int(3.1 * beat)
+	bs._process(0.0)
+	_check(not bs.active and reasons == ["idle"], "3.1 beats without input ends it (\"idle\")")
+	_free_beat_state(bs)
+
+
+func _test_miss_resets_chain() -> void:
+	print("Combo count after a Miss (miss_resets_chain; Supplement 1's Miss State)")
+	for resets: bool in [true, false]:
+		var bs := _make_beat_state()
+		var beat := int(bs.music.beat_seconds() * 1_000_000.0)
+		bs.miss_resets_chain = resets
+		bs.on_attack(Time.get_ticks_usec(), "Vox", "close")
+		var a: int = bs._anchor_usec
+		bs.on_attack(a + beat, "Vox", "close")  # Perfect, chain 1
+		bs.on_attack(a + 2 * beat + 70_000, "Vox", "close")  # Good, chain 2
+		bs.on_attack(a + 2 * beat + beat / 2, "Vox", "close")  # Miss, Beat-State runs on
+		var after_miss := bs.chain
+		bs.on_attack(a + 3 * beat, "Vox", "close")  # Perfect
+		if resets:
+			_check(bs.active and after_miss == 0 and bs.chain == 1, "on: the chain is 0 after the Miss, then counts up again")
+		else:
+			_check(bs.active and after_miss == 2 and bs.chain == 3, "off: the chain carries on through the Miss")
+		_free_beat_state(bs)
+
+
+func _test_growth_log_sessions() -> void:
+	print("Growth log, one file per session (build call, 2026-11-21)")
+	var first := GrowthLog.new()
+	root.add_child(first)
+	first.record(RhythmWindows.Grade.PERFECT, 5.0, 0.0, "combat", "Vox", 1)
+	var second := GrowthLog.new()
+	root.add_child(second)
+	second.record(RhythmWindows.Grade.MISS, 200.0, 0.0, "combat", "Vox", 0)
+	_check(first.path != second.path and FileAccess.file_exists(first.path) and FileAccess.file_exists(second.path),
+		"two sessions write two files")
+	_check(first.path.begins_with("user://growth_log_") and first.path.ends_with(".jsonl"), "files are named growth_log_<date>_<time>.jsonl")
+	var lines := FileAccess.get_file_as_string(first.path).strip_edges().split("\n")
+	var header: Variant = JSON.parse_string(lines[0])
+	var entry: Variant = JSON.parse_string(lines[1]) if lines.size() > 1 else null
+	_check(lines.size() == 2 and header is Dictionary and header.has("session_start") and str(header.get("godot_version", "")).begins_with("4.7"),
+		"the first file is intact: a session header with start time and Godot version, then its entry")
+	_check(entry is Dictionary and entry["grade"] == "Perfect" and entry.has("chain_index"), "the entry schema is unchanged")
+	first.queue_free()
+	second.queue_free()
+
+
+func _test_airborne_switch_silent() -> void:
+	print("Airborne switch refused silently (Supplement 1, System 4)")
+	var proto: Node = await _spawn_proto()
+	proto.vox.global_position.y = 4.0
+	for i in 2:
+		await physics_frame
+	var event_before: String = proto._event
+	var airborne: bool = not proto.vox.is_on_floor()
+	proto._switch()
+	_check(airborne and proto.active == proto.vox, "a switch in the air is refused")
+	_check(proto._event == event_before, "the refusal leaves the event text unchanged")
+	proto.queue_free()
+	await process_frame
+
+
+func _test_gamepad_bindings() -> void:
+	print("Provisional gamepad bindings (O-01)")
+	load("res://scripts/proto/beat_state_proto.gd").ensure_actions()
+	var buttons := {
+		"dt_left": JOY_BUTTON_DPAD_LEFT, "dt_right": JOY_BUTTON_DPAD_RIGHT, "dt_jump": JOY_BUTTON_A,
+		"dt_attack_close": JOY_BUTTON_X, "dt_attack_mid": JOY_BUTTON_Y, "dt_interact": JOY_BUTTON_B,
+		"dt_switch": JOY_BUTTON_RIGHT_SHOULDER, "dt_calib_up": JOY_BUTTON_DPAD_UP,
+		"dt_calib_down": JOY_BUTTON_DPAD_DOWN, "dt_debug": JOY_BUTTON_BACK,
+	}
+	for action: String in buttons:
+		var found := false
+		for ev in InputMap.action_get_events(action):
+			found = found or (ev is InputEventJoypadButton and ev.button_index == buttons[action])
+		_check(found, "%s has its gamepad button" % action)
+	var axes := {"dt_left": -1.0, "dt_right": 1.0}
+	for action: String in axes:
+		var found := false
+		for ev in InputMap.action_get_events(action):
+			found = found or (ev is InputEventJoypadMotion and ev.axis == JOY_AXIS_LEFT_X and signf(ev.axis_value) == axes[action])
+		_check(found and is_equal_approx(InputMap.action_get_deadzone(action), 0.3), "%s has the left stick with a 0.3 deadzone" % action)
+	var keys := {
+		"dt_left": [KEY_A, KEY_LEFT], "dt_right": [KEY_D, KEY_RIGHT], "dt_jump": [KEY_SPACE, KEY_W],
+		"dt_attack_close": [KEY_J], "dt_attack_mid": [KEY_K], "dt_interact": [KEY_E], "dt_switch": [KEY_TAB],
+		"dt_calib_down": [KEY_BRACKETLEFT], "dt_calib_up": [KEY_BRACKETRIGHT], "dt_debug": [KEY_F3],
+	}
+	var kept := true
+	for action: String in keys:
+		for k: int in keys[action]:
+			var has_key := false
+			for ev in InputMap.action_get_events(action):
+				has_key = has_key or (ev is InputEventKey and ev.physical_keycode == k)
+			kept = kept and has_key
+	_check(kept, "every keyboard key is kept")

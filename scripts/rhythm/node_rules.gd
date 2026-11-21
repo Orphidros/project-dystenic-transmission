@@ -10,8 +10,8 @@ const NODE_MISS_TICK := 3.0
 ## Combat rates (O-07), used at time-critical nodes.
 const COMBAT_POOR_TICK := 3.0
 const COMBAT_MISS_TICK := 6.0
-## How time-critical nodes are read: the first-fault grace doesn't apply there
-## either, because combat has no grace. This is an interpretation, still to be confirmed.
+## CoD-06; OQ-A07 (ruled 2026-11-09): the first-fault grace lapses at time-critical nodes.
+## There, every fault, the first included, builds stress at the combat rate.
 const GRACE_AT_TIME_CRITICAL := false
 
 

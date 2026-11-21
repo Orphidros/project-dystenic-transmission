@@ -92,3 +92,74 @@ A refused switch returns before any state changes. "Silent" means it returns wit
 **Why.** A loose search-and-replace corrupts things you didn't mean to touch.
 
 **Watch out.** Always grep afterwards for leftovers, and look at the diff before committing.
+
+---
+
+*Entries added 2026-11-21: the Beat-State miss rule, gamepad bindings, per-session logs and ruling citations.*
+
+## Counting in a row against counting in total
+
+**What it is.** Two counters for the same event. One counts how many happened **in a row**, and resets whenever something else happens in between. The other counts how many happened **in total**, and resets only when the whole episode ends.
+
+**Where in DT.** `BeatState` keeps `misses_in_a_row` and `misses_total`.
+- A Perfect, Good or Poor sets `misses_in_a_row` back to 0.
+- `misses_total` only resets when Beat-State starts again.
+- Beat-State ends at 2 in a row (`"two_in_a_row"`) or 3 in total (`"third_miss"`), per CoD-07 as amended 2026-11-21.
+
+The author's examples:
+- Start, Good, Miss, Poor, Miss, Good, Miss never has two in a row, but reaches three in total, so it ends on the third.
+- Start, Good, Miss, Miss ends on two in a row.
+
+**Why.** "In a row" catches a player who has lost the beat. "In total" caps how sloppy a whole run can get. Each counter answers a different question, so you need both.
+
+**Watch out.** Decide which counter wins when both trip on the same input. Here, two-in-a-row is checked first. Reset both at the start of each Beat-State, or a fresh run starts already half-failed.
+
+## One action, many devices: the InputMap
+
+**What it is.** Godot's InputMap gives each control a name, such as `dt_jump`, and lets you attach any number of physical inputs to that name: keys, gamepad buttons, stick directions. Game code only ever asks about the name, for example `is_action_pressed("dt_jump")`.
+
+**Where in DT.** `ensure_actions()` in `scripts/proto/beat_state_proto.gd` attaches:
+- the keyboard keys (`ACTIONS`);
+- the provisional gamepad buttons (`PAD_BUTTONS`);
+- the left stick (`PAD_AXES`), with a 0.3 **deadzone**: stick movement under 30% is ignored, so a resting thumb doesn't drift the character.
+
+A gamepad press goes through the same `_input()` function as a key press, so it's timed the same way. The bindings are provisional, because the real layout is the input map's (O-01).
+
+**Why.** Changing the controls never touches gameplay code. When O-01 settles the layout, only the binding lists change.
+
+**Watch out.**
+- Set `device = -1` on gamepad events so any connected controller works.
+- Add events only if they're missing (`action_has_event`), so running the setup twice doesn't double-bind.
+
+## Never overwrite a log
+
+**What it is.** Each run writes a new file whose name includes the date and time. If that name is already taken, it adds `_2`, `_3` and so on. The first line of the file is a **header** saying when the session started and which Godot version ran it.
+
+**Where in DT.** `GrowthLog.new_session_path()` builds names like `user://growth_log_2026-11-21_14-05-09.jsonl`. `_ready()` writes the header line. Each later line is one judged input, with the same fields as before.
+
+**Why.**
+- Playtest data is evidence. The pair-bond thresholds and the growth-log schema both wait on it (OQ-056).
+- Overwriting last night's session with today's would destroy the very thing you're collecting.
+- The header tells you later which build produced the numbers.
+
+**Watch out.**
+- Check whether the file exists *before* opening it for writing. Opening a file for writing creates it, which is what makes the second same-second session pick `_2`.
+- `user://` is Godot's per-user data folder. On Windows it's under `%APPDATA%\Godot\app_userdata\<project name>\`.
+
+## Comments that cite rulings
+
+**What it is.** When a piece of code exists because of a design ruling, its comment names the ruling's ID. If the ruling was later changed, the comment gives the amendment date, for example `CoD-07, amended 2026-11-21`.
+
+**Where in DT.** These all carry IDs now:
+- `beat_state.gd`: the end rule, the idle gap and the handoff;
+- `node_rules.gd`: the time-critical grace, CoD-06 and OQ-A07;
+- `growth_log.gd` and `rhythm_windows.gd`: CoD-01 and OQ-067;
+- the prototype controller: OQ-066, OQ-A10 and O-01.
+
+Each record in `design/decisions/` lists the files and the commit that carry it, so you can go from a bug to its ruling and from a ruling to its code.
+
+**Why.** Months from now, "why does a single Miss not end Beat-State?" has an answer you can look up. Without it, someone "fixes" the code back to the old rule.
+
+**Watch out.**
+- Use only the existing prefixes: CoD-, OQ-, O- and FLAG-.
+- A build decision that isn't a ruling gets labelled as a build call, with its date, not a made-up ID.

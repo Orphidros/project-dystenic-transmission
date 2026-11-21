@@ -79,8 +79,39 @@ Out of scope: Tier 1.5 or later. Do not build these.
   the O-43 rhythm-sound hint; real passages and a real track; node types beyond the cadence answer;
   the Hub state (Tier 3).
 
-New rulings: write each one into design/decisions/ the same day, and bring it to the Project's
-Systems & Code diary.
+Decision records (author, 2026-11-20 and 2026-11-21; OQ-068):
+- Every ruling the author makes, in any thread, gets a record in design/decisions/.
+- A ruling made in a Claude Code session: write its record the same day, and list it in the
+  build report for the Project's Systems & Code diary. Only these rulings take new CoD- numbers.
+- Rulings made in the Project's threads arrive in decision files that the Systems & Code thread's
+  prompts carry. Commit them as given. They keep their OQ-, FLAG- or O- IDs. Never invent a new
+  ID prefix.
+- Traceability: a code comment that carries a ruling cites its ID, with the amendment date when a
+  ruling amends one (for example "CoD-07, amended 2026-11-21"). Each record lists the files and the
+  commit that carry it, so a bug can be traced to its ruling and back.
+
+## Rulings newer than the mirror (until Plan v2.3.0)
+
+These come from the author after Plan v2.2.0. They win over the mirror above until the plan's
+next revision re-mirrors its §2.
+- Beat-State ends on two Misses in a row, on the third Miss in total within the loaded pattern, or
+  on an idle gap of three beats (amends CoD-07; author, 2026-11-20 and 2026-11-21). After a Miss
+  that doesn't end it, the beat keeps playing and the combo count resets to zero, per Supplement 1's
+  Miss State (the prototype's miss_resets_chain, on, until the author confirms or changes it).
+- The combo flows and keeps growing, as in Batman: Arkham Asylum. The player can strike whether or
+  not Beat-State runs (2026-11-20).
+- The beat that loads depends on the stage, the enemy, the character, and the opening range (the
+  distance to the enemy and the opening attack's range tier) and input. This widens CoD-07
+  (2026-11-20 and 2026-11-21). Tier 1 keeps one placeholder passage per character per range tier,
+  on one placeholder track.
+- Attack inputs aren't decided; they're settled with the input map (O-01). The author tests with a
+  gamepad and expects many buttons and combinations of them. The prototype's J and K keys and its
+  provisional gamepad bindings stand in. Button combinations are input design, not CoD-04's
+  combination attacks.
+- Counters, parries and learnable Solo-Finishers join the combat design (2026-11-21). Tier 1
+  builds one parry-and-counter, against the Basic Bot's single attack, telegraphed and graded on
+  the beat, together with the Basic Bot (Phase 4). The other counters and parries, and
+  Solo-Finishers with how they're learned, are Tier 1.5: don't build them.
 
 ## Session rule: always end with something running
 

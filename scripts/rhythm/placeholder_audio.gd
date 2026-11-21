@@ -1,6 +1,6 @@
 class_name PlaceholderAudio
 extends RefCounted
-## Placeholder sounds generated in code (CoD-12), so the prototype needs no audio assets.
+## Placeholder sounds generated in code (CoD-12; OQ-A08), so the prototype needs no audio assets.
 ## Real compositions replace them at Tier 1.5. Every sound here belongs to Audio & SFX.
 
 const RATE := 22050

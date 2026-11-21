@@ -2,7 +2,7 @@ class_name PairBond
 extends Node
 ## The hidden Vox-Ciphera pair-bond (CoD-01, CoD-13 to CoD-15).
 ## It is never shown as a number. Its only tell is Ciphera's rig light, through band().
-## The band thresholds are placeholders, to be set from playtest data in the growth log.
+## The band thresholds are placeholders, to be set from playtest data in the growth log (OQ-056).
 
 signal changed(value: int, band: int)
 
