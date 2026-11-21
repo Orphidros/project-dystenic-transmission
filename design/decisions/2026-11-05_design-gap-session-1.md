@@ -1,3 +1,5 @@
+Re-tagged by the author on 2026-11-09: D-nn here is CoD-nn in CLAUDE.md and the Project.
+
 # Design-gap session 1: decision records (2026-11-05)
 
 These are the author's rulings from the design-gap discussion that followed the two research rounds. Design folds them into the GDD and Supplement 1, and Systems & Code builds from them. This file is a record for handoff, not a canon source; the GDD and S1 stay authoritative once they are updated.

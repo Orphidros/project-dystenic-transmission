@@ -1,6 +1,6 @@
 class_name GrowthLog
 extends Node
-## The growth-credit log (D-01). It records every judged input and spends nothing in Tier 1.
+## The growth-credit log (CoD-01). It records every judged input and spends nothing in Tier 1.
 ## Its schema follows session 1's default proposal: grade, signed offset, offset applied,
 ## context, character and chain index. Each session writes a fresh JSON Lines file.
 

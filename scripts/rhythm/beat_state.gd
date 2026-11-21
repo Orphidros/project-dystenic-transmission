@@ -1,6 +1,6 @@
 class_name BeatState
 extends Node
-## Beat-State, or Rhythmic Focus (D-07, D-09 to D-11).
+## Beat-State, or Rhythmic Focus (CoD-07, CoD-09 to CoD-11).
 ## The first attack of a single-character chain is an ungraded anchor. It starts that
 ## character's instrument passage instantly, and later inputs are graded against the
 ## passage's targets, not the background track. Beat-State ends on a Miss or an idle gap.
@@ -63,7 +63,7 @@ func on_attack(press_usec: int, p_character: String, p_tier: String) -> void:
 		_judge(press_usec)
 
 
-## D-11: the passage moves to the incoming member's instrument at the same phase.
+## CoD-11: the passage moves to the incoming member's instrument at the same phase.
 func hand_off(new_character: String) -> void:
 	if not active:
 		return
@@ -94,7 +94,7 @@ func _enter(press_usec: int, p_character: String, p_tier: String) -> void:
 	tier = p_tier
 	chain = 0
 	_judged.clear()
-	_judged[0] = true  # D-09: the opening attack is the ungraded anchor at beat zero.
+	_judged[0] = true  # CoD-09: the opening attack is the ungraded anchor at beat zero.
 	_handoff_pending = false
 	_anchor_usec = press_usec + music.audio_lead_usec()
 	_last_input_usec = press_usec
@@ -135,7 +135,7 @@ func _judge(press_usec: int) -> void:
 	if _handoff_pending:
 		_handoff_pending = false
 		if RhythmWindows.is_credit(g):
-			pair_bond.record_shared_success("handoff")  # D-13
+			pair_bond.record_shared_success("handoff")  # CoD-13
 	judged.emit(g, offset_ms, chain, character)
 
 

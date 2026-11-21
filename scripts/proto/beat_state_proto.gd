@@ -18,6 +18,12 @@ const ACTIONS: Dictionary = {
 	"dt_calib_up": [KEY_BRACKETRIGHT],
 	"dt_debug": [KEY_F3],
 }
+## CoD-11, the Beat-State passage handoff on a switch, is Tier 1.5. Its code stays, but only
+## runs when this is on. Off (Tier 1): a switch request while Beat-State runs is refused
+## silently, and the same request is accepted once Beat-State ends on a Miss or an idle gap
+## (author, 2026-11-20).
+@export var beat_state_handoff_enabled := false
+
 const COMBAT_MISS_STRESS := 6.0  # O-07: stress rises on a Miss.
 const CHAIN_RELIEF_FROM := 5  # O-07: and falls on sustained chains.
 const ENEMY_HEARING_M := 10.0
@@ -127,9 +133,11 @@ func _switch() -> void:
 	if not active.is_on_floor():
 		_set_event("Switching is ground-only")
 		return
+	if beat_state.active and not beat_state_handoff_enabled:
+		return  # Refused silently until Beat-State ends (author, 2026-11-20).
 	var next := ciphera if active == vox else vox
 	_set_active(next)
-	if beat_state.active:
+	if beat_state.active:  # Reached only with the CoD-11 handoff enabled.
 		beat_state.hand_off(next.display_name)
 		_set_event("Handoff to %s at the same phase" % next.display_name)
 

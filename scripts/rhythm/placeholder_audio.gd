@@ -1,6 +1,6 @@
 class_name PlaceholderAudio
 extends RefCounted
-## Placeholder sounds generated in code (D-12), so the prototype needs no audio assets.
+## Placeholder sounds generated in code (CoD-12), so the prototype needs no audio assets.
 ## Real compositions replace them at Tier 1.5. Every sound here belongs to Audio & SFX.
 
 const RATE := 22050
@@ -50,7 +50,7 @@ static func drone() -> AudioStreamWAV:
 	return _to_stream(b, true)
 
 
-## A one-bar instrument passage for one character and one range tier (D-07).
+## A one-bar instrument passage for one character and one range tier (CoD-07).
 ## Its notes fall exactly on the targets the player is graded against.
 static func passage(bpm: float, character: String, tier: String, targets: Array) -> AudioStreamWAV:
 	var b := _buffer(beats_to_seconds(bpm, 4.0))
@@ -68,7 +68,7 @@ static func passage(bpm: float, character: String, tier: String, targets: Array)
 	return _to_stream(b, true)
 
 
-## The node's Oracle cadence (D-03): one bar, not looped.
+## The node's Oracle cadence (CoD-03): one bar, not looped.
 static func cadence(bpm: float, pattern: Array) -> AudioStreamWAV:
 	var b := _buffer(beats_to_seconds(bpm, 4.0))
 	var steps: Array[float] = [1.0, 1.0, 1.189, 0.891]
@@ -81,7 +81,7 @@ static func cadence(bpm: float, pattern: Array) -> AudioStreamWAV:
 	return _to_stream(b, false)
 
 
-## Beat-hit sounds by grade. The Miss is a discordant scratch and never a choice tone (D-08).
+## Beat-hit sounds by grade. The Miss is a discordant scratch and never a choice tone (CoD-08).
 static func hit(grade: int) -> AudioStreamWAV:
 	var b := _buffer(0.3)
 	match grade:
@@ -98,7 +98,7 @@ static func hit(grade: int) -> AudioStreamWAV:
 	return _to_stream(b, false)
 
 
-## Vox's voice cracking on a Poor node answer (D-05).
+## Vox's voice cracking on a Poor node answer (CoD-05).
 static func crack() -> AudioStreamWAV:
 	var b := _buffer(0.45)
 	_tone(b, 0.0, 0.4, 0.0, 0.3, "noise", 9.0)

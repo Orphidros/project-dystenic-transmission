@@ -1,6 +1,6 @@
 class_name PairBond
 extends Node
-## The hidden Vox-Ciphera pair-bond (D-01, D-13 to D-15).
+## The hidden Vox-Ciphera pair-bond (CoD-01, CoD-13 to CoD-15).
 ## It is never shown as a number. Its only tell is Ciphera's rig light, through band().
 ## The band thresholds are placeholders, to be set from playtest data in the growth log.
 
@@ -11,12 +11,12 @@ const BAND_THRESHOLDS: Array[int] = [0, 3, 6, 10]
 var value: int = 0
 
 
-## D-13: a node answer or a Beat-State handoff, at Perfect or Good.
+## CoD-13: a node answer or a Beat-State handoff, at Perfect or Good.
 func record_shared_success(source: String) -> void:
 	_add(1, source)
 
 
-## D-14: only choices can lower the bond. Harmonic raises it; the missed note lowers it.
+## CoD-14: only choices can lower the bond. Harmonic raises it; the missed note lowers it.
 func record_micro_choice(harmonic: bool) -> void:
 	_add(2 if harmonic else -2, "micro_choice")
 

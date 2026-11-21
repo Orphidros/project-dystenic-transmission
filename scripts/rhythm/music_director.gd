@@ -1,6 +1,6 @@
 class_name MusicDirector
 extends Node
-## Plays the encounter track, the area sound and Beat-State's drone (D-07, D-10).
+## Plays the encounter track, the area sound and Beat-State's drone (CoD-07, CoD-10).
 ## When Beat-State starts, the track and ambience pitch-drop, filter down and duck,
 ## and a low drone rises underneath. The music never stops.
 

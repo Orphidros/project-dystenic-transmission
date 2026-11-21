@@ -31,6 +31,6 @@ static func grade_name(g: int) -> String:
 	return GRADE_NAMES[g]
 
 
-## Perfect and Good earn growth credit (D-01) and can write the pair-bond (D-13).
+## Perfect and Good earn growth credit (CoD-01) and can write the pair-bond (CoD-13).
 static func is_credit(g: int) -> bool:
 	return g == Grade.PERFECT or g == Grade.GOOD

@@ -34,32 +34,53 @@ free-roaming 3D game:
 - Level geometry should be built with the plane lock in mind: width and
   height can vary freely, depth stays within the locked axis band.
 
-## Tier 1 prototype: scope lock
+## Tier 1 scope lock — mirror of Tier 1 Prototype Plan v2.2.0, §2
 
-The current milestone is a deliberately small, locked-scope prototype. Do
-not expand scope without the user explicitly asking, even if a request seems
-like a natural next step:
+The plan of record in the claude.ai Project (DT_SystemsCode_Tier1PrototypePlan_v2.2.0) is the
+authority, read with Supplement 1 v1.8.0. This section mirrors its §2. If they differ, the plan
+wins: stop and ask.
 
-- **Characters:** exactly two playable characters — **Vox Nullis** and
-  **Ciphera**. No additional characters.
-- **Map:** one small map, **3–5 rooms**. No overworld, no multiple levels.
-- **Explicitly out of scope for Tier 1** — do not implement, even partially,
-  without confirming first:
-  - Permadeath
-  - Combination attacks (two-character and Full Band). Single-character
-    graded chains and phrases are in scope, including Beat-State and the
-    passage handoff on a switch (author, 2026-11-05).
-  - Aerial character-switching
-- **Approved Tier 1 additions (author, 2026-11-05):**
-  - a hidden Vox–Ciphera pair-bond integer;
-  - Ciphera's rig as a beat light (no attacks, no ally AI);
-  - a growth-credit log (records only; nothing is spent in Tier 1).
+Rulings are tagged CoD-01 to CoD-16. The 2026-11-05 design-gap session numbered them D-01 to D-16,
+and the author re-tagged them on 2026-11-09 so that they never read as the Genre Bible's D-1 to D-6.
+design/decisions/2026-11-05_design-gap-session-1.md keeps its original numbers: D-nn there is CoD-nn.
+Never give a new ruling a bare D- number.
 
-  Rulings and their details are in
-  `design/decisions/2026-11-05_design-gap-session-1.md`. The GDD and
-  Supplement 1 remain the canon once Design folds them in.
-- If a request would break this scope lock, say so and confirm with the user
-  before building it.
+In scope at Tier 1
+- Vox Nullis and Ciphera, playable. Metronome, Gravicus and Serratrix-9 as placeholder mannequins.
+- A greybox map of 3–5 connected rooms.
+- One attack button and a one-to-two-hit chain by a single character, run in Beat-State
+  (CoD-07, CoD-09, CoD-10): the opening attack is an ungraded anchor, later inputs are graded
+  against the character's passage, and Beat-State ends on a Miss or an idle gap of about three beats.
+- Simple placeholder beats, one per range tier for Vox and Ciphera (CoD-12). No real CyberSludge
+  track at Tier 1.
+- The rhythm grades any encounter that needs a combination of presses; free movement isn't graded.
+- Three enemy types as simple-shape silhouettes: Basic Bot, Flying Drone, Heavy Unit.
+- Stamina per character (O-02). Stress as a hidden value shown by body tells (O-07), with the node
+  faults of CoD-05 and CoD-06.
+- Ground-based switching between Vox and Ciphera through the Switching state. A switch request
+  while Beat-State runs is refused, silently, until Beat-State ends (author, 2026-11-20).
+- Wave-Lock v1, and one traversal gate: the Vox/Ciphera cadence node (CoD-03, CoD-05, CoD-06),
+  with what each character sees set by O-43.
+- One micro-choice, revealed by tone alone (O-48).
+- The rig light (CoD-02); the hidden pair-bond (CoD-01, CoD-13 to CoD-15); calibration (CoD-16).
+- The growth log (CoD-01): records every judged input with its grade and signed offset, and spends
+  nothing. Only Perfect and Good hits count as growth credit (author, 2026-11-20).
+- A minimal save.
+
+Out of scope: Tier 1.5 or later. Do not build these.
+- The Beat-State handoff on a switch (CoD-11). The prototype branch already has it: keep it behind
+  beat_state_handoff_enabled = false.
+- Combat switching, including the aerial strike swap (FLAG-45a).
+- Combination attacks, two-character and Full Band (FLAG-45b). "No combo systems" means exactly
+  this (CoD-04).
+- Ally combat AI; Ciphera's bond-flaw incapacitation; the full Stress spec; the Oracle Core Charge;
+  permadeath and injuries; the Death, Dialogue, Cinematic, Stealth and Dispatch states; the other
+  three members as playable; cel-shading and all shader work; the 3-state adaptive audio machine;
+  the O-43 rhythm-sound hint; real passages and a real track; node types beyond the cadence answer;
+  the Hub state (Tier 3).
+
+New rulings: write each one into design/decisions/ the same day, and bring it to the Project's
+Systems & Code diary.
 
 ## Session rule: always end with something running
 

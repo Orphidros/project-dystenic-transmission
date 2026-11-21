@@ -1,6 +1,6 @@
 class_name NodeRules
 extends RefCounted
-## Rulings D-05 and D-06 (2026-11-05) as a pure function, so they can be tested.
+## Rulings CoD-05 and CoD-06 (2026-11-05) as a pure function, so they can be tested.
 ## The stress amounts are placeholders. Only their order matters for now:
 ## the free first fault < a node Poor < a node Miss < combat rates.
 
@@ -28,10 +28,10 @@ static func resolve(worst_grade: int, first_fault_used: bool, time_critical: boo
 	}
 	if worst_grade == RhythmWindows.Grade.PERFECT or worst_grade == RhythmWindows.Grade.GOOD:
 		r["opened"] = true
-		r["bond_delta"] = 1  # D-13: answering a node Ciphera revealed is a shared moment.
+		r["bond_delta"] = 1  # CoD-13: answering a node Ciphera revealed is a shared moment.
 	elif worst_grade == RhythmWindows.Grade.POOR:
 		r["opened"] = true
-		r["crack"] = true  # D-05: the crack always carries, even on the free first fault.
+		r["crack"] = true  # CoD-05: the crack always carries, even on the free first fault.
 		var poor_tick := COMBAT_POOR_TICK if time_critical else NODE_POOR_TICK
 		r["stress_delta"] = _fault_stress(first_fault_used, time_critical, poor_tick)
 		r["first_fault_used"] = true

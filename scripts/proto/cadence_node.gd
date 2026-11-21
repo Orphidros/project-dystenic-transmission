@@ -1,6 +1,6 @@
 class_name CadenceNode
 extends Node3D
-## The Tier 1 enviro-puzzle node (O-33, O-43, D-03, D-05, D-06).
+## The Tier 1 enviro-puzzle node (O-33, O-43, CoD-03, CoD-05, CoD-06).
 ## Ciphera reveals it, then Vox answers its Oracle cadence on the beat. The node plays
 ## the cadence for one bar, and Vox answers the same rhythm in the next bar.
 ## The worst graded note decides the result (NodeRules).
@@ -181,7 +181,7 @@ func _resolve() -> void:
 		state = State.RESOLVING
 		_mat.emission_energy_multiplier = 0.3
 		rejected.emit()
-		_replay_at_usec = Time.get_ticks_usec() + int(2.0 * _beat_usec())  # D-05: the node replays the cadence
+		_replay_at_usec = Time.get_ticks_usec() + int(2.0 * _beat_usec())  # CoD-05: the node replays the cadence
 
 
 func _beat_usec() -> float:

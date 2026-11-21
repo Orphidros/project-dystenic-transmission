@@ -1,7 +1,7 @@
 class_name RigLight
 extends OmniLight3D
-## Ciphera's rig as a beat light (D-02). It moves with her, pulses on the beat, and has
-## no attacks and no AI. Its warmth and steadiness are the pair-bond's only tell (D-15).
+## Ciphera's rig as a beat light (CoD-02). It moves with her, pulses on the beat, and has
+## no attacks and no AI. Its warmth and steadiness are the pair-bond's only tell (CoD-15).
 ## Chosen light is small, so the range is short.
 
 const COOL := Color(0.45, 0.8, 1.0)

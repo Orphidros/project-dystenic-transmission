@@ -18,8 +18,11 @@ func _run() -> void:
 	_test_node_rules()
 	_test_pair_bond()
 	_test_beat_state()
+	_test_growth_credit()
 	await process_frame
 	await _smoke_prototype()
+	await _test_switch_during_beat_state()
+	await _test_handoff_flag_on()
 	print("\n%d passed, %d failed" % [_passes, _fails])
 	quit(1 if _fails > 0 else 0)
 
@@ -45,7 +48,7 @@ func _test_windows() -> void:
 
 
 func _test_node_rules() -> void:
-	print("NodeRules (D-05, D-06)")
+	print("NodeRules (CoD-05, CoD-06)")
 	var r := NodeRules.resolve(RhythmWindows.Grade.PERFECT, false, false)
 	_check(r["opened"] and int(r["bond_delta"]) == 1 and float(r["stress_delta"]) == 0.0, "Perfect opens cleanly and writes the bond")
 	r = NodeRules.resolve(RhythmWindows.Grade.POOR, false, false)
@@ -59,11 +62,11 @@ func _test_node_rules() -> void:
 	_check(NodeRules.NODE_MISS_TICK < NodeRules.COMBAT_MISS_TICK, "node faults build slower than combat")
 	r = NodeRules.resolve(RhythmWindows.Grade.MISS, false, true)
 	_check(float(r["stress_delta"]) == NodeRules.COMBAT_MISS_TICK, "time-critical node uses the combat rate")
-	_check(int(NodeRules.resolve(RhythmWindows.Grade.POOR, false, false)["bond_delta"]) == 0, "a Poor answer leaves the bond alone (D-14)")
+	_check(int(NodeRules.resolve(RhythmWindows.Grade.POOR, false, false)["bond_delta"]) == 0, "a Poor answer leaves the bond alone (CoD-14)")
 
 
 func _test_pair_bond() -> void:
-	print("PairBond (D-13, D-14)")
+	print("PairBond (CoD-13, CoD-14)")
 	var b := PairBond.new()
 	b.record_shared_success("node")
 	b.record_shared_success("handoff")
@@ -77,7 +80,7 @@ func _test_pair_bond() -> void:
 
 
 func _test_beat_state() -> void:
-	print("BeatState (D-07, D-09 to D-11)")
+	print("BeatState (CoD-07, CoD-09 to CoD-11)")
 	var music := MusicDirector.new()
 	root.add_child(music)
 	var log := GrowthLog.new()
@@ -156,5 +159,87 @@ func _smoke_prototype() -> void:
 	_check(proto.beat_state.active, "an attack starts Beat-State in the scene")
 	for i in 5:
 		await process_frame
+	proto.queue_free()
+	await process_frame
+
+
+func _test_growth_credit() -> void:
+	print("GrowthLog (CoD-01; author, 2026-11-20)")
+	var log := GrowthLog.new()
+	root.add_child(log)
+	var grades: Array[int] = [RhythmWindows.Grade.PERFECT, RhythmWindows.Grade.GOOD, RhythmWindows.Grade.POOR, RhythmWindows.Grade.MISS]
+	var offsets: Array[float] = [-12.0, 60.0, -120.0, 200.0]
+	for i in grades.size():
+		log.record(grades[i], offsets[i], 5.0, "combat", "Vox", i)
+	_check(log.entries.size() == 4, "every judged input is recorded, Poor and Miss included")
+	var fields: Array[String] = ["grade", "offset_ms", "applied_offset_ms", "context", "character", "chain_index"]
+	var complete := true
+	for e: Dictionary in log.entries:
+		for f in fields:
+			complete = complete and e.has(f)
+	_check(complete, "each entry has grade, signed offset, offset applied, context, character, chain index")
+	_check(float(log.entries[0]["offset_ms"]) < 0.0 and float(log.entries[2]["offset_ms"]) < 0.0, "offsets keep their sign")
+	_check(int(log.credits.get("Vox", 0)) == 2, "only Perfect and Good count as growth credit")
+	log.queue_free()
+
+
+## A fresh prototype room with both characters landed on the floor.
+func _spawn_proto() -> Node:
+	var scene: PackedScene = load("res://scenes/proto/beat_state_proto.tscn")
+	var proto := scene.instantiate()
+	root.add_child(proto)
+	for i in 90:
+		await physics_frame
+	return proto
+
+
+func _test_switch_during_beat_state() -> void:
+	print("Switching during Beat-State, handoff off (CoD-11; author, 2026-11-20)")
+	var proto: Node = await _spawn_proto()
+	var beat := int(proto.music.beat_seconds() * 1_000_000.0)
+	_check(proto.beat_state_handoff_enabled == false, "beat_state_handoff_enabled defaults to false")
+
+	proto._attack(Time.get_ticks_usec(), "close")
+	var event_before: String = proto._event
+	proto._switch()
+	_check(proto.active == proto.vox and proto.beat_state.active and proto.beat_state.character == "Vox",
+		"a switch is refused while Beat-State runs")
+	_check(proto._event == event_before, "the refusal is silent")
+
+	var anchor: int = proto.beat_state._anchor_usec
+	proto._attack(anchor + beat / 2, "close")  # half a beat off the passage: a Miss
+	_check(not proto.beat_state.active, "a Miss ends Beat-State")
+	proto._switch()
+	_check(proto.active == proto.ciphera, "the same switch is accepted after a Miss")
+
+	for i in 10:
+		await physics_frame  # Ciphera takes over the body physics and lands
+	proto._attack(Time.get_ticks_usec(), "close")
+	proto._switch()
+	_check(proto.active == proto.ciphera and proto.beat_state.active, "refused again in Ciphera's Beat-State")
+	var deadline := Time.get_ticks_usec() + int(proto.beat_state.idle_gap_beats * beat) + 500_000
+	while proto.beat_state.active and Time.get_ticks_usec() < deadline:
+		await process_frame
+	_check(not proto.beat_state.active, "an idle gap ends Beat-State")
+	proto._switch()
+	_check(proto.active == proto.vox, "the same switch is accepted after an idle gap")
+	proto.queue_free()
+	await process_frame
+
+
+func _test_handoff_flag_on() -> void:
+	print("Switching during Beat-State, handoff on (CoD-11 kept behind the flag)")
+	var proto: Node = await _spawn_proto()
+	var beat := int(proto.music.beat_seconds() * 1_000_000.0)
+	proto.beat_state_handoff_enabled = true
+	proto._attack(Time.get_ticks_usec(), "close")
+	proto._switch()
+	_check(proto.active == proto.ciphera and proto.beat_state.active and proto.beat_state.character == "Ciphera",
+		"with the flag on, the passage hands off and Beat-State continues")
+	var anchor: int = proto.beat_state._anchor_usec
+	proto._attack(anchor + beat, "close")
+	_check(proto.beat_state.last_grade == RhythmWindows.Grade.PERFECT and proto.beat_state.chain == 1,
+		"the chain continues on the incoming member's passage")
+	_check(proto.pair_bond.value == 1, "a Perfect after the handoff writes the pair-bond (CoD-13)")
 	proto.queue_free()
 	await process_frame
