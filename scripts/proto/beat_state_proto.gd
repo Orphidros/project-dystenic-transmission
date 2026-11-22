@@ -20,8 +20,9 @@ const ACTIONS: Dictionary = {
 	"dt_calib_up": [KEY_BRACKETRIGHT],
 	"dt_debug": [KEY_F3],
 }
-## Provisional gamepad bindings for the author's test on his PC (Systems & Code, 2026-11-21).
-## The real control layout belongs to the input map (O-01) and isn't decided. Xbox names.
+## These bindings follow the Tier 1 input map (O-01, 2026-11-22) for every action the prototype has,
+## except the calibration nudges ([ ] and D-pad down/up), which stay as developer keys until the
+## options menu has its calibration slider. Xbox names. Parry, dodge and pause aren't built yet.
 const PAD_BUTTONS: Dictionary = {
 	"dt_left": [JOY_BUTTON_DPAD_LEFT],
 	"dt_right": [JOY_BUTTON_DPAD_RIGHT],
@@ -68,6 +69,7 @@ var _enemy_mat: StandardMaterial3D
 var _hit_players: Array[AudioStreamPlayer] = []
 var _crack_player: AudioStreamPlayer
 var _event := "Approach the far wall. Only Ciphera can see what's there."
+var _pattern_tier := ""  # the passage of the pattern now playing, for the completion event
 
 
 ## The Phase 1 input map normally lives in project.godot; the prototype registers its own.
@@ -116,6 +118,8 @@ func _ready() -> void:
 	beat_state.judged.connect(_on_judged)
 	beat_state.entered.connect(func(who: String, tier: String) -> void: _set_event("%s enters Rhythmic Focus (%s passage)" % [who, tier]))
 	beat_state.exited.connect(func(reason: String) -> void: _set_event("Beat-State ends: %s" % reason))
+	beat_state.entered.connect(func(_who: String, tier: String) -> void: _pattern_tier = tier)
+	beat_state.pattern_completed.connect(_on_pattern_completed)
 	_build_characters()
 	_build_node()
 	for g in 4:
@@ -209,6 +213,16 @@ func _on_judged(grade: int, offset_ms: float, chain: int, character: String) -> 
 	elif chain >= CHAIN_RELIEF_FROM and RhythmWindows.is_credit(grade):
 		who.add_stress(-1.0)
 	_set_event("%s %+.0f ms, chain %d" % [RhythmWindows.grade_name(grade), offset_ms, chain])
+
+
+## CoD-07 (amended 2026-11-21): a completed pattern carries the combo, and the closing attack
+## picks the next pattern.
+func _on_pattern_completed(number: int, chain: int, next_tier: String) -> void:
+	if next_tier != _pattern_tier:
+		_set_event("Pattern %d complete: Switch-up to the %s passage, combo %d carries on" % [number, next_tier, chain])
+	else:
+		_set_event("Pattern %d complete: the %s pattern again, combo %d carries on" % [number, next_tier, chain])
+	_pattern_tier = next_tier
 
 
 func _on_node_note(grade: int, offset_ms: float) -> void:
@@ -321,7 +335,9 @@ func _update_hud() -> void:
 			perks += "  [stamina saver]"
 		if beat_state.chain >= 5:
 			perks += "  [damage boost]"
-		lines.append("Beat-State: ON (%s passage)   chain %d%s" % [beat_state.tier, beat_state.chain, perks])
+		lines.append("Beat-State: ON (%s passage, pattern %d, bar %d of %d)   chain %d%s" % [
+			beat_state.tier, beat_state.pattern_number, beat_state.bar_in_pattern(), beat_state.pattern_bars,
+			beat_state.chain, perks])
 	else:
 		lines.append("Beat-State: off   (J/K or X/Y to attack; the first attack starts the passage)")
 	if beat_state.last_grade >= 0:

@@ -8,7 +8,9 @@ extends Node
 ## an earlier one (Systems & Code build call, 2026-11-21). The first line is a session header with
 ## the start time and the Godot version.
 
-const PREFIX := "user://growth_log_"
+## Where session files go. Normal play keeps every file in user://. Tests point this at a folder of
+## their own before any log opens, and delete it afterwards (build call, 2026-11-21).
+static var folder := "user://"
 
 var path := ""
 var entries: Array[Dictionary] = []
@@ -30,8 +32,9 @@ func _ready() -> void:
 ## A file name nobody has used yet: growth_log_<date>_<time>.jsonl, plus _2, _3 and so on if
 ## two sessions start in the same second.
 static func new_session_path() -> String:
+	DirAccess.make_dir_recursive_absolute(folder)
 	var stamp := Time.get_datetime_string_from_system().replace("T", "_").replace(":", "-")
-	var base := PREFIX + stamp
+	var base := folder.path_join("growth_log_" + stamp)
 	var candidate := base + ".jsonl"
 	var n := 2
 	while FileAccess.file_exists(candidate):

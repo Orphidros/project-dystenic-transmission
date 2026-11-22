@@ -10,9 +10,11 @@ rather than assuming familiarity with Godot conventions.
 
 ## Engine
 
-- Godot **4.7**, Forward+ renderer (`config/features` in `project.godot`).
+- Godot **4.7.2**, pinned by the author on 2026-11-22 (OQ-181). Forward+ renderer
+  (`config/features` in `project.godot`).
 - Physics: **Jolt Physics** (`3d/physics_engine="Jolt Physics"`).
-- Windows rendering driver: D3D12.
+- Windows rendering driver: D3D12. Forward+ with D3D12 on Windows is the author's choice (OQ-182),
+  with Vulkan as the fallback if D3D12 misbehaves.
 - No `godot`/`godot4` binary is on PATH in this environment — to run or
   headless-check the project, ask the user for their Godot executable path
   rather than assuming one, or have them run it via the editor.
@@ -94,24 +96,44 @@ Decision records (author, 2026-11-20 and 2026-11-21; OQ-068):
 
 These come from the author after Plan v2.2.0. They win over the mirror above until the plan's
 next revision re-mirrors its §2.
-- Beat-State ends on two Misses in a row, on the third Miss in total within the loaded pattern, or
-  on an idle gap of three beats (amends CoD-07; author, 2026-11-20 and 2026-11-21). After a Miss
-  that doesn't end it, the beat keeps playing and the combo count resets to zero, per Supplement 1's
-  Miss State (the prototype's miss_resets_chain, on, until the author confirms or changes it).
+- Beat-State plays in patterns: four bars of the loaded passage at Tier 1 (`pattern_bars`); later
+  patterns may be longer or more complex. A pattern ends early on two Misses in a row, on the third
+  Miss in total within it, on environmental damage (at once), or on an idle gap of three beats, and
+  an early end ends the combo. An enemy hit is a Miss, with its own sound: a percussive amp-feedback
+  buzz alongside the enemy's hit-type sound, in place of the scratch. A Miss that doesn't end the
+  pattern pauses the combo: it keeps its number, and the next Perfect, Good or Poor carries on from
+  it. A pattern played through to its end is complete: the combo carries over, and the next pattern
+  starts on the following bar with no new opening attack and a fresh miss count. The next pattern is
+  picked by the same factors that picked the first, so it repeats or becomes a Pattern Switch-up or
+  a Pattern Extension. At Tier 1 the closing attack's range tier picks it, and Extensions wait for
+  new passages. This amends CoD-07 and, within Beat-State, Supplement 1's Miss State (author,
+  2026-11-20 and 2026-11-21). The damage hooks exist in `BeatState`; wire them, and the enemy hit's
+  sound, when damage exists.
 - The combo flows and keeps growing, as in Batman: Arkham Asylum. The player can strike whether or
   not Beat-State runs (2026-11-20).
 - The beat that loads depends on the stage, the enemy, the character, and the opening range (the
   distance to the enemy and the opening attack's range tier) and input. This widens CoD-07
   (2026-11-20 and 2026-11-21). Tier 1 keeps one placeholder passage per character per range tier,
   on one placeholder track.
-- Attack inputs aren't decided; they're settled with the input map (O-01). The author tests with a
-  gamepad and expects many buttons and combinations of them. The prototype's J and K keys and its
-  provisional gamepad bindings stand in. Button combinations are input design, not CoD-04's
-  combination attacks.
+- The Tier 1 input map (O-01; author, 2026-11-22). Gamepad (Xbox names), then keyboard: move, left
+  stick or D-pad, A/D or the arrows; jump, A, Space or W; close attack, X, J; mid attack, Y, K;
+  interact and the node's answer, B, E; switch, RB, Tab; parry, LB, L (graded on the beat; a counter
+  is any attack in the opening after it); dodge, RT, Shift; pause, Menu, Esc; the debug overlay,
+  View, F3, in dev builds only. Calibration is a slider in the options menu, not a button. LT, both
+  stick clicks and the right stick are free for later. Light, heavy and directional variants and
+  button combinations wait for Tier 1.5's move set. Phase 1 writes the map into `project.godot`,
+  and it stays rebindable.
+- Phase 0 still runs: the prototype's run isn't Phase 0 (OQ-051). It installs dt-godot v0.6.0 on
+  this branch, and the prototype's folders (`scripts/`, `scenes/`, `tests/`) are the convention
+  dt-godot documents (OQ-137; author, 2026-11-22).
 - Counters, parries and learnable Solo-Finishers join the combat design (2026-11-21). Tier 1
   builds one parry-and-counter, against the Basic Bot's single attack, telegraphed and graded on
   the beat, together with the Basic Bot (Phase 4). The other counters and parries, and
   Solo-Finishers with how they're learned, are Tier 1.5: don't build them.
+- Developer switches live in one `dev_tools` module that can be removed and is left out of the
+  release build (author, 2026-11-21). It isn't built yet; until it is, add no new developer switches.
+- O-52's test switch, when it's built with the Basic Bot, is one of these developer switches
+  (author, 2026-11-21).
 
 ## Session rule: always end with something running
 

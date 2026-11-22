@@ -163,3 +163,76 @@ Each record in `design/decisions/` lists the files and the commit that carry it,
 **Watch out.**
 - Use only the existing prefixes: CoD-, OQ-, O- and FLAG-.
 - A build decision that isn't a ruling gets labelled as a build call, with its date, not a made-up ID.
+
+---
+
+*Entries added 2026-11-22: patterns, the bar line, the combo pause, the damage hooks and test clean-up.*
+
+## Fixed-length patterns on a running clock
+
+**What it is.** A pattern is a fixed slice of time: four bars, which is 16 beats, at Tier 1. The slices are measured from one fixed moment, the anchor, which is when the opening attack's downbeat was heard. Pattern 2 is beats 16 to 32 after that anchor, pattern 3 is 32 to 48, and so on. The anchor never moves. Each pattern boundary is just "anchor + n × pattern length".
+
+**Where in DT.** `BeatState` keeps `pattern_number` and `pattern_bars`. `_bar_line_usec()` gives the moment the current pattern ends.
+- A pattern **completes** when its closing bar line is heard (`_process`), or earlier, when a press plays the next pattern's downbeat a little early.
+- On completion, the combo carries on, the miss counts reset, and the next pattern starts with no new opening attack (CoD-07, amended 2026-11-21).
+- Each press belongs to the pattern of the beat it's graded against.
+
+**Why.** Restarting the clock each pattern would let tiny timing errors pile up, until pattern 5 drifts against the music. One fixed anchor keeps every bar line exactly where the music puts it.
+
+**Watch out.**
+- Decide which pattern an event belongs to *before* changing anything. Here a press near the bar line is matched to its nearest beat first, and only then does the old pattern complete, if that beat was the new pattern's.
+- Key remembered beats by **bar and position**, not by a running count. Then a pattern that switches from a 4-beat to a 5-beat passage doesn't shift every later beat.
+
+## Changing a loop exactly on the bar line
+
+**What it is.** To swap one looping sound for another without a stumble, start the new one slightly *before* the bar line, already partway through its loop. Its own downbeat then arrives at the very moment the bar line is heard.
+
+**Where in DT.** A Switch-up, where the closing attack picks the other range tier's passage. `_start_passage_ahead()` works out how far into its loop the new passage should begin. It uses the same arithmetic as `hand_off()`: `(now + audio lead − anchor)`, wrapped by the loop's length.
+- The **audio lead** is how long a sound takes to be heard after you ask Godot to play it: the time to the next audio mix plus the output latency.
+- The swap starts once no press can still belong to the old pattern, and at most 50 ms before the bar line.
+
+**Why.** Godot 4.7 can't schedule a sound for a future moment, so you start it early, at the right phase.
+
+**Watch out.**
+- Start early enough that one slow frame can't push the start *past* the bar line. If it does, the downbeat gets clipped.
+- In tests, measure the audio lead first. Headless runs mix in uneven chunks (0 to 90 ms), so a test that assumes a small lead fails at random.
+
+## Holding a count instead of resetting it
+
+**What it is.** When something goes wrong, you can wipe a counter, or *freeze* it: it keeps its number, stops growing, and carries on from there when things go right again.
+
+**Where in DT.** The combo (`chain`) pauses on a Miss that doesn't end the pattern. A combo at 9, followed by a Miss, stays at 9, and the next Perfect, Good or Poor makes it 10 (CoD-07, amended 2026-11-21). This replaced the old `miss_resets_chain` switch: there's no code at all for "on a Miss, do something to the chain". Not touching it is the rule.
+
+**Why.** It rewards recovering instead of punishing every slip. The real penalty lives in the Miss counts, which end the pattern on two in a row or the third in total.
+
+**Watch out.** Make sure every path that should leave the count alone really does. Both a missed input and an enemy hit go through one shared function, `_count_miss()`, so they can't drift apart.
+
+## Hooks for systems that don't exist yet
+
+**What it is.** Write the function another system will call (the *hook*), with its rules and tests, before that other system exists. Then build the caller later and just call it.
+
+**Where in DT.**
+- `BeatState.on_enemy_hit(hit_type)`: an enemy hit counts as a Miss but isn't a timed input. It emits `enemy_hit_taken` instead of `judged`, writes nothing to the growth log, and doesn't reset the idle gap.
+- `BeatState.on_environmental_damage()`: ends the pattern at once, with the reason `"environment"`.
+- Nothing calls these yet. The Basic Bot and hazards will (Phases 3 and 4), and the tests call them directly.
+
+**Why.** The rules are decided now, while the author's words are fresh, and they're proven by tests. When damage arrives, wiring it is one line, and the behaviour is already known to be right.
+
+**Watch out.**
+- Say plainly in the comment that nothing calls the hook yet, and who will.
+- Make the hook safe to call at any time: both do nothing outside Beat-State.
+
+## Tests that clean up after themselves
+
+**What it is.** A test run should leave the computer as it found it. Anything it writes goes to its own throwaway folder, which it deletes at the end, whether the tests passed or failed.
+
+**Where in DT.**
+- `GrowthLog.folder` is a **static** setting, shared by every growth log. That lets the tests change it before the prototype scene creates its own log.
+- `tests/run_tests.gd` points it at `user://test_logs/`, runs everything, waits a few frames for logs to close their files, deletes the folder, and puts the setting back.
+- It also checks that a normal play session's file, written before the tests started, is still there and unchanged.
+
+**Why.** Earlier runs left a pile of growth-log files mixed in with real playtest logs, which are evidence you want to keep clean.
+
+**Watch out.**
+- Close files before deleting them. Windows refuses to delete a file that's still open.
+- Restore any setting you changed, so the next thing that runs sees the default.
