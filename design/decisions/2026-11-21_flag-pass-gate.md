@@ -4,7 +4,7 @@
 - **Thread:** Design Documentation (GDD and Supplement 1)
 - **Decided by:** the author (Orphidros)
 - **Recorded in the Project:** the Design diary, 2026-11-21 entry. The Open Questions Register (OQ-180 answered; OQ-049 added) and the GDD's Status paragraph take it at the weekly synchronization pass of 2026-11-23.
-- **Commit:** (filled in by the Claude Code session that commits this file)
+- **Commit:** `a0d99a8`
 
 ## Rulings
 
