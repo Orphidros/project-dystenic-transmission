@@ -41,5 +41,6 @@ These are recommendations, not rulings.
 - **Use it for pages that are merely JavaScript-heavy,** such as Steam, store pages and modern blogs.
 - **Don't use it to get around a site that deliberately blocks bots or charges for access.** Fandom's 402, GameFAQs' and TCRF's 403 and Cloudflare challenges are examples. That can breach the site's terms, so find another source.
 - **Prefer primary sources.** Developer posts, patch notes and official docs still win, as in round 2's evidence tiers.
-- **Mind the credits.** Each scrape costs Firecrawl credits, and crawls and agent runs cost many. The `firecrawl_credit_usage` tool shows what's left.
+- **Mind the credits.** Each scrape costs Firecrawl credits, and crawls and agent runs cost many. The `firecrawl_credit_usage` tool shows what's left. Seen on 2026-11-28: a search with `categories: ["developer"]` cost 2 credits, a plain markdown scrape 1, and a scrape with `formats: ["query"]` (asking a question of the page) 5. Use the question form only when the page is long and you need one fact from it.
+- **Check repos with GitHub's search API too.** For stars, license, last push and archived status, `gh api -X GET search/repositories -f q="repo:owner/name"` is free. One unknown `repo:` name makes GitHub reject the whole query (HTTP 422), and forks need `fork:true`.
 - **The tools that matter most:** `firecrawl_scrape` (one page), `firecrawl_search` (search, with page contents), `firecrawl_map` (every URL on a site) and `firecrawl_interact` (click and scroll through a page). The server offers 32 tools in all.
