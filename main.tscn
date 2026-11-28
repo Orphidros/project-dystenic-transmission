@@ -1,3 +1,7 @@
 [gd_scene format=3 uid="uid://cqow47bch5ocs"]
 
+[ext_resource type="PackedScene" path="res://scenes/proto/beat_state_proto.tscn" id="1_proto"]
+
 [node name="Node3D" type="Node3D" unique_id=675612547]
+
+[node name="BeatStateProto" parent="." instance=ExtResource("1_proto")]
